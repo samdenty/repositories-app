@@ -2,10 +2,10 @@ use headless_chrome::protocol::browser::Bounds;
 use headless_chrome::protocol::target::methods::CreateTarget;
 use headless_chrome::protocol::Method;
 use headless_chrome::Tab;
-use headless_chrome::{protocol::page::ScreenshotFormat, Browser};
+use headless_chrome::{protocol::page::ScreenshotFormat, Browser, LaunchOptionsBuilder};
 use serde::Serialize;
-use std::io::Error;
 use std::sync::Arc;
+use std::{io::Error, time::Duration};
 
 pub struct Renderer {
   browser: Browser,
@@ -13,9 +13,13 @@ pub struct Renderer {
 
 impl Renderer {
   pub fn new() -> Result<Self, Error> {
-    Ok(Renderer {
-      browser: Browser::default().expect("failed to create browser"),
-    })
+    let launch_options = LaunchOptionsBuilder::default()
+      .idle_browser_timeout(Duration::MAX)
+      .build()
+      .expect("");
+    let browser = Browser::new(launch_options).expect("failed to create browser");
+
+    Ok(Renderer { browser })
   }
 
   pub fn load(&self, url: &str) -> Result<IconRenderer, Error> {
@@ -55,6 +59,7 @@ impl IconRenderer {
   }
 
   pub fn render(&self, resolution: u32) -> Result<Vec<u8>, Error> {
+    let now = std::time::Instant::now();
     self
       .tab
       .set_bounds(Bounds::Normal {
@@ -75,6 +80,7 @@ impl IconRenderer {
       .capture_screenshot(ScreenshotFormat::PNG, None, true)
       .expect("failed capturing screenshot");
 
+    println!("{}px {:.2?}", resolution, now.elapsed());
     Ok(data)
   }
 }

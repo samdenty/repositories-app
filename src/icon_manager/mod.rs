@@ -2,20 +2,30 @@ mod renderer;
 mod rsrc;
 use icns::{IconFamily, Image};
 use renderer::Renderer;
-use std::io::{Cursor, Error};
+use std::{
+  collections::HashMap,
+  io::{Cursor, Error},
+  rc::Rc,
+};
 
 pub struct IconManager {
   renderer: Renderer,
+  cache: HashMap<String, Rc<Icon>>,
 }
 
 impl IconManager {
   pub fn new() -> Result<Self, Error> {
     Ok(IconManager {
       renderer: Renderer::new()?,
+      cache: HashMap::new(),
     })
   }
 
-  pub fn load(&self, url: &str) -> Result<Icon, Error> {
+  pub fn load(&mut self, url: &str) -> Result<Rc<Icon>, Error> {
+    if let Some(icon) = self.cache.get(url) {
+      return Ok(icon.clone());
+    }
+
     let icon_renderer = self.renderer.load(url)?;
 
     let mut icon_family = IconFamily::new();
@@ -29,7 +39,11 @@ impl IconManager {
     icon_family.write(&mut icns).unwrap();
     let rsrc = rsrc::encode(&icns)?;
 
-    Ok(Icon { icns, rsrc })
+    let icon = Rc::new(Icon { icns, rsrc });
+
+    self.cache.insert(url.to_string(), icon.clone());
+
+    Ok(icon)
   }
 }
 

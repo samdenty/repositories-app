@@ -115,7 +115,7 @@ impl Filesystem for HelloFS {
     } else if ino == 2 {
       reply.data(&HELLO_TXT_CONTENT.as_bytes()[offset as usize..]);
     } else {
-      reply.error(ENOENT);
+      reply.data("".as_bytes());
     }
   }
 

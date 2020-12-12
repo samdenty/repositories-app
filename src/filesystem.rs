@@ -1,10 +1,10 @@
 use crate::client;
 use crate::icon_manager::IconManager;
 use crate::Organization;
+use colored::*;
 use fuse::*;
 use github_rs::client::Executor;
-use libc::ENOENT;
-use libc::ENOSYS;
+use libc::*;
 use std::io::Error;
 use std::time::SystemTime;
 use std::time::{Duration, UNIX_EPOCH};
@@ -486,24 +486,45 @@ impl Filesystem for HelloFS {
   //   reply.error(ENOSYS);
   // }
 
-  // fn getxattr(
-  //   &mut self,
-  //   _req: &Request<'_>,
-  //   _ino: u64,
-  //   _name: &OsStr,
-  //   _size: u32,
-  //   reply: ReplyXattr,
-  // ) {
-  //   println!("getxattr");
-  //   reply.
-  //   reply.error(ENOSYS);
-  // }
+  fn getxattr(
+    &mut self,
+    _req: &Request<'_>,
+    _ino: u64,
+    _name: &OsStr,
+    _size: u32,
+    reply: ReplyXattr,
+  ) {
+    println!("getxattr {} {:?}", _ino, _name);
+    if _ino == 10 {
+      if _name == "com.apple.FinderInfo" {
+        reply.data(&hex_literal::hex!(
+          "69636F6E 4D414353 40100000 00000000 00000000 00000000 00000000 00000000"
+        ))
+      } else {
+        println!("{}", "start rendering".green());
+        let now = std::time::Instant::now();
+        let icon = self.icon_manager.load("https://example.com").unwrap();
+        println!(
+          "{} {:.2?} {}",
+          "done rendering".green(),
+          now.elapsed(),
+          icon.rsrc.len()
+        );
+        reply.data(&icon.rsrc)
+      }
+    } else {
+      reply.error(ENOATTR);
+    }
+  }
 
-  // fn listxattr(&mut self, _req: &Request<'_>, _ino: u64, _size: u32, reply: ReplyXattr) {
-  //   println!("listxattr");
-  //   reply.data();
-  //   reply.error(ENOSYS);
-  // }
+  fn listxattr(&mut self, _req: &Request<'_>, _ino: u64, _size: u32, reply: ReplyXattr) {
+    println!("listxattr {}", _ino);
+    if _ino == 10 {
+      reply.data("com.apple.FinderInfo\u{0}com.apple.ResourceFork\u{0}".as_bytes());
+    } else {
+      reply.data("".as_bytes());
+    }
+  }
 
   // fn removexattr(&mut self, _req: &Request<'_>, _ino: u64, _name: &OsStr, reply: ReplyEmpty) {
   //   println!("removexattr");
