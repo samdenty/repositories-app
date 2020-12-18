@@ -1,6 +1,8 @@
 use byteorder::{BigEndian, WriteBytesExt};
 use std::io::Error;
 
+// A reverse-engineered implementation of the macos
+// Icon\r resource fork binary format
 pub fn encode(icns: &Vec<u8>) -> Result<Vec<u8>, Error> {
   let mut rsrc = Vec::new();
   let icon_size = icns.len() as u32;

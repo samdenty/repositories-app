@@ -1,5 +1,6 @@
 mod renderer;
 mod rsrc;
+use colored::*;
 use icns::{IconFamily, Image};
 use renderer::Renderer;
 use std::{
@@ -26,10 +27,13 @@ impl IconManager {
       return Ok(icon.clone());
     }
 
+    println!("{}", "start rendering".green());
+    let now = std::time::Instant::now();
+
     let icon_renderer = self.renderer.load(url)?;
 
     let mut icon_family = IconFamily::new();
-    for &resolution in &vec![1024, 512, 256, 128, 64, 48, 32, 16] {
+    for &resolution in &vec![/* 1024, */ 512 /* 256, 128, 64, 48, 32, 16 */] {
       let png = icon_renderer.render(resolution)?;
       let image = Image::read_png(Cursor::new(png)).unwrap();
       icon_family.add_icon(&image).unwrap();
@@ -42,6 +46,13 @@ impl IconManager {
     let icon = Rc::new(Icon { icns, rsrc });
 
     self.cache.insert(url.to_string(), icon.clone());
+
+    println!(
+      "{} {:.2?} {}",
+      "done rendering".green(),
+      now.elapsed(),
+      icon.rsrc.len()
+    );
 
     Ok(icon)
   }

@@ -97,7 +97,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   //   .text()
   //   .await?;
 
-  let icon_manager = IconManager::new()?;
+  let mut icon_manager = IconManager::new()?;
+  // icon_manager.load("https://example.com")?;
+
   filesystem::mount(icon_manager)?;
   // let icon = icon_manager.load("http://google.com/")?;
 

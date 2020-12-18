@@ -13,59 +13,6 @@ use std::{env, ffi::OsStr};
 
 const TTL: Duration = Duration::from_secs(1); // 1 second
 
-const HELLO_DIR_ATTR: FileAttr = FileAttr {
-  ino: 1,
-  size: 0,
-  blocks: 0,
-  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-  mtime: UNIX_EPOCH,
-  ctime: UNIX_EPOCH,
-  crtime: UNIX_EPOCH,
-  kind: FileType::Directory,
-  perm: 0o755,
-  nlink: 2,
-  uid: 501,
-  gid: 20,
-  rdev: 0,
-  flags: 0,
-};
-
-const HELLO_TXT_CONTENT: &str = "Hello World!\n";
-
-const HELLO_TXT_ATTR: FileAttr = FileAttr {
-  ino: 2,
-  size: 13,
-  blocks: 1,
-  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-  mtime: UNIX_EPOCH,
-  ctime: UNIX_EPOCH,
-  crtime: UNIX_EPOCH,
-  kind: FileType::RegularFile,
-  perm: 0o644,
-  nlink: 1,
-  uid: 501,
-  gid: 20,
-  rdev: 0,
-  flags: 0,
-};
-
-const ICON_TXT_ATTR: FileAttr = FileAttr {
-  ino: 3,
-  size: 13,
-  blocks: 1,
-  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-  mtime: UNIX_EPOCH,
-  ctime: UNIX_EPOCH,
-  crtime: UNIX_EPOCH,
-  kind: FileType::RegularFile,
-  perm: 0o644,
-  nlink: 1,
-  uid: 501,
-  gid: 20,
-  rdev: 0,
-  flags: 0,
-};
-
 struct HelloFS {
   orgs: Vec<Organization>,
   icon_manager: IconManager,
@@ -87,160 +34,118 @@ impl HelloFS {
   }
 }
 
+const ROOT: FileAttr = FileAttr {
+  ino: 1,
+  size: 128,
+  blocks: 8,
+  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
+  mtime: UNIX_EPOCH,
+  ctime: UNIX_EPOCH,
+  crtime: UNIX_EPOCH,
+  kind: FileType::Directory,
+  perm: 0o755,
+  nlink: 4,
+  uid: 501,
+  gid: 20,
+  rdev: 0,
+  flags: 0,
+};
+const TEST: FileAttr = FileAttr {
+  ino: 2,
+  size: 96,
+  blocks: 8,
+  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
+  mtime: UNIX_EPOCH,
+  ctime: UNIX_EPOCH,
+  crtime: UNIX_EPOCH,
+  kind: FileType::Directory,
+  perm: 0o755,
+  nlink: 3,
+  uid: 501,
+  gid: 20,
+  rdev: 0,
+  flags: 0,
+};
+const ICON: FileAttr = FileAttr {
+  ino: 3,
+  size: 13,
+  blocks: 8,
+  atime: UNIX_EPOCH, // 1970-01-01 00:00:00
+  mtime: UNIX_EPOCH,
+  ctime: UNIX_EPOCH,
+  crtime: UNIX_EPOCH,
+  kind: FileType::RegularFile,
+  perm: 0o644,
+  nlink: 1,
+  uid: 501,
+  gid: 20,
+  rdev: 0,
+  flags: 0,
+};
+
 impl Filesystem for HelloFS {
   fn lookup(&mut self, _req: &Request, parent: u64, name: &OsStr, reply: ReplyEntry) {
     if name == "Icon\r" {
-      reply.entry(
-        &TTL,
-        &FileAttr {
-          ino: 10,
-          size: 0,
-          blocks: 1,
-          atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-          mtime: UNIX_EPOCH,
-          ctime: UNIX_EPOCH,
-          crtime: UNIX_EPOCH,
-          kind: FileType::RegularFile,
-          perm: 0o644,
-          nlink: 1,
-          uid: 501,
-          gid: 20,
-          rdev: 0,
-          flags: 0,
-        },
-        0,
-      );
-      return;
+      println!("lookup {:?}", name.to_str());
+      reply.entry(&TTL, &ICON, 0);
+    } else if name == "test" {
+      println!("lookup {:?}", name.to_str());
+      reply.entry(&TTL, &TEST, 0);
+    } else {
+      println!("{} lookup {:?} {}", "enoent".red(), name.to_str(), parent);
+      reply.error(ENOENT);
     }
 
-    if parent == 1 {
-      let index = self
-        .orgs
-        .iter()
-        .position(|org| org.login == name.to_str().unwrap());
-
-      if let Some(index) = index {
-        println!("lookup {:?}", name.to_str());
-        reply.entry(
-          &TTL,
-          &FileAttr {
-            ino: (index + 2).try_into().unwrap(),
-            size: 0,
-            blocks: 0,
-            atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-            mtime: UNIX_EPOCH,
-            ctime: UNIX_EPOCH,
-            crtime: UNIX_EPOCH,
-            kind: FileType::Directory,
-            perm: 0o755,
-            nlink: 1,
-            uid: 501,
-            gid: 20,
-            rdev: 0,
-            flags: 0,
-          },
-          0,
-        );
-        return;
-      }
-    }
-
-    println!("enoent lookup {:?} {}", name.to_str(), parent);
-
-    reply.error(ENOENT);
+    // if parent == 1 {
+    //   let index = self
+    //     .orgs
+    //     .iter()
+    //     .position(|org| org.login == name.to_str().unwrap());
+    //   if let Some(index) = index {
+    //     reply.entry(
+    //       &TTL,
+    //       &FileAttr {
+    //         ino: (index + 2).try_into().unwrap(),
+    //         size: 0,
+    //         blocks: 0,
+    //         atime: UNIX_EPOCH, // 1970-01-01 00:00:00
+    //         mtime: UNIX_EPOCH,
+    //         ctime: UNIX_EPOCH,
+    //         crtime: UNIX_EPOCH,
+    //         kind: FileType::Directory,
+    //         perm: 0o755,
+    //         nlink: 1,
+    //         uid: 501,
+    //         gid: 20,
+    //         rdev: 0,
+    //         flags: 0,
+    //       },
+    //       0,
+    //     );
+    //     return;
+    //   }
+    // }
   }
 
   fn getattr(&mut self, _req: &Request, ino: u64, reply: ReplyAttr) {
-    let org = if ino >= 2 {
-      self.orgs.get((ino - 2) as usize)
-    } else {
-      None
-    };
+    // let org = if ino >= 2 {
+    //   self.orgs.get((ino - 2) as usize)
+    // } else {
+    //   None
+    // };
 
     if ino == 1 {
       println!("getattr: {}", ino);
-      reply.attr(
-        &TTL,
-        &FileAttr {
-          ino: 1,
-          size: 0,
-          blocks: 0,
-          atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-          mtime: UNIX_EPOCH,
-          ctime: UNIX_EPOCH,
-          crtime: UNIX_EPOCH,
-          kind: FileType::Directory,
-          perm: 0o755,
-          nlink: 1,
-          uid: 501,
-          gid: 20,
-          rdev: 0,
-          flags: 0,
-        },
-      )
-    } else if ino == 10 {
+      reply.attr(&TTL, &ROOT);
+    } else if ino == 2 {
       println!("getattr: {}", ino);
-      reply.attr(
-        &TTL,
-        &FileAttr {
-          ino: 10,
-          size: 13,
-          blocks: 1,
-          atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-          mtime: UNIX_EPOCH,
-          ctime: UNIX_EPOCH,
-          crtime: UNIX_EPOCH,
-          kind: FileType::RegularFile,
-          perm: 0o644,
-          nlink: 1,
-          uid: 501,
-          gid: 20,
-          rdev: 0,
-          flags: 0,
-        },
-      )
-    } else if let Some(org) = org {
+      reply.attr(&TTL, &TEST);
+    } else if ino == 3 {
       println!("getattr: {}", ino);
-      reply.attr(
-        &TTL,
-        &FileAttr {
-          ino,
-          size: 0,
-          blocks: 0,
-          atime: UNIX_EPOCH, // 1970-01-01 00:00:00
-          mtime: UNIX_EPOCH,
-          ctime: UNIX_EPOCH,
-          crtime: UNIX_EPOCH,
-          kind: FileType::Directory,
-          perm: 0o755,
-          nlink: 1,
-          uid: 501,
-          gid: 20,
-          rdev: 0,
-          flags: 0,
-        },
-      )
+      reply.attr(&TTL, &ICON);
     } else {
-      println!("enoent getattr: {}", ino);
+      println!("{} getattr: {}", "enoent".red(), ino);
       reply.error(ENOENT)
-    }
-  }
-
-  fn read(
-    &mut self,
-    _req: &Request,
-    ino: u64,
-    _fh: u64,
-    offset: i64,
-    _size: u32,
-    reply: ReplyData,
-  ) {
-    println!("read {}", ino);
-
-    if ino == 10 {
-      reply.data(&HELLO_TXT_CONTENT.as_bytes()[offset as usize..]);
-    } else {
-      reply.error(ENOENT);
     }
   }
 
@@ -252,26 +157,28 @@ impl Filesystem for HelloFS {
     offset: i64,
     mut reply: ReplyDirectory,
   ) {
-    println!("readdir {}", ino);
     if ino == 1 {
-      let mut entries = vec![
+      println!("readdir {} {}", ino, _fh);
+      let entries = vec![
         (1, FileType::Directory, "."),
         (1, FileType::Directory, ".."),
+        (2, FileType::Directory, "test"),
       ];
-      for (i, org) in self.orgs.iter().enumerate() {
-        entries.push(((i + 2) as u64, FileType::Directory, org.login.as_str()));
-        // println!("{:#?}", org.login);
-      }
+      // for (i, org) in self.orgs.iter().enumerate() {
+      //   entries.push(((i + 2) as u64, FileType::Directory, org.login.as_str()));
+      //   // println!("{:#?}", org.login);
+      // }
       for (i, entry) in entries.into_iter().enumerate().skip(offset as usize) {
         // i + 1 means the index of the next entry
         reply.add(entry.0, (i + 1) as i64, entry.1, entry.2);
       }
       reply.ok();
-    } else if ino == 4 {
+    } else if ino == 2 {
+      println!("readdir {} {}", ino, _fh);
       let entries = vec![
-        (4, FileType::Directory, "."),
-        (4, FileType::Directory, ".."),
-        (10, FileType::RegularFile, "Icon\r"),
+        (2, FileType::Directory, "."),
+        (1, FileType::Directory, ".."),
+        (3, FileType::RegularFile, "Icon\r"),
       ];
       for (i, entry) in entries.into_iter().enumerate().skip(offset as usize) {
         // i + 1 means the index of the next entry
@@ -279,16 +186,98 @@ impl Filesystem for HelloFS {
       }
       reply.ok();
     } else {
+      println!("{} readdir {} {}", "enoent".red(), ino, _fh);
       reply.error(ENOENT);
     }
   }
 
+  fn getxattr(
+    &mut self,
+    _req: &Request<'_>,
+    ino: u64,
+    _name: &OsStr,
+    _size: u32,
+    reply: ReplyXattr,
+  ) {
+    let data = if ino == 2 {
+      if _name == "com.apple.FinderInfo" {
+        Some(
+          hex_literal::hex!(
+            "00000000 00000000 04000000 00000000 00000000 00000000 00000000 00000000"
+          )
+          .to_vec(),
+        )
+      } else {
+        None
+      }
+    } else if ino == 3 {
+      Some(if _name == "com.apple.FinderInfo" {
+        hex_literal::hex!("69636F6E 4D414353 40100000 00000000 00000000 00000000 00000000 00000000")
+          .to_vec()
+      } else {
+        let icon = self.icon_manager.load("https://google.com").unwrap();
+        icon.rsrc.clone()
+      })
+    } else {
+      None
+    };
+
+    if let Some(data) = data {
+      println!("getxattr {} {:?} {}", ino, _name, _size);
+      if _size == 0 {
+        reply.size(data.len().try_into().unwrap());
+      } else {
+        reply.data(&data)
+      }
+    } else {
+      println!("{} getxattr {} {:?} {}", "enoattr".red(), ino, _name, _size);
+      reply.error(ENOATTR)
+    }
+  }
+
+  // fn read(
+  //   &mut self,
+  //   _req: &Request,
+  //   ino: u64,
+  //   _fh: u64,
+  //   offset: i64,
+  //   _size: u32,
+  //   reply: ReplyData,
+  // ) {
+  //   println!("read {}", ino);
+
+  //   if ino == 10 {
+  //     reply.data(&HELLO_TXT_CONTENT.as_bytes()[offset as usize..]);
+  //   } else {
+  //     reply.error(ENOENT);
+  //   }
+  // }
+
+  fn listxattr(&mut self, _req: &Request<'_>, ino: u64, _size: u32, reply: ReplyXattr) {
+    println!("listxattr {} {}", ino, _size);
+
+    let data = if ino == 2 {
+      "com.apple.FinderInfo\u{0}"
+    } else if ino == 3 {
+      "com.apple.FinderInfo\u{0}com.apple.ResourceFork\u{0}"
+    } else {
+      ""
+    }
+    .as_bytes();
+
+    if _size == 0 {
+      reply.size(data.len().try_into().unwrap());
+    } else {
+      reply.data(&data)
+    }
+  }
+
   // fn destroy(&mut self, _req: &Request<'_>) {
-  //   println!("destroy");
+  //   println!("{}", "destroy".red());
   // }
 
   // fn forget(&mut self, _req: &Request<'_>, _ino: u64, _nlookup: u64) {
-  //   println!("forget");
+  //   println!("{}", "forget".red());
   // }
 
   // fn setattr(
@@ -308,12 +297,12 @@ impl Filesystem for HelloFS {
   //   _flags: Option<u32>,
   //   reply: ReplyAttr,
   // ) {
-  //   println!("setattr");
+  //   println!("{}", "setattr".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn readlink(&mut self, _req: &Request<'_>, _ino: u64, reply: ReplyData) {
-  //   println!("readlink");
+  //   println!("{}", "readlink".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -326,7 +315,7 @@ impl Filesystem for HelloFS {
   //   _rdev: u32,
   //   reply: ReplyEntry,
   // ) {
-  //   println!("mknod");
+  //   println!("{}", "mknod".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -338,18 +327,18 @@ impl Filesystem for HelloFS {
   //   _mode: u32,
   //   reply: ReplyEntry,
   // ) {
-  //   println!("mkdir");
+  //   println!("{}", "mkdir".red());
   //   reply.entry(&TTL, &HELLO_TXT_ATTR, 0)
   //   // reply.error(ENOSYS);
   // }
 
   // fn unlink(&mut self, _req: &Request<'_>, _parent: u64, _name: &OsStr, reply: ReplyEmpty) {
-  //   println!("unlink");
+  //   println!("{}", "unlink".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn rmdir(&mut self, _req: &Request<'_>, _parent: u64, _name: &OsStr, reply: ReplyEmpty) {
-  //   println!("rmdir");
+  //   println!("{}", "rmdir".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -361,7 +350,7 @@ impl Filesystem for HelloFS {
   //   _link: &Path,
   //   reply: ReplyEntry,
   // ) {
-  //   println!("symlink");
+  //   println!("{}", "symlink".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -374,7 +363,7 @@ impl Filesystem for HelloFS {
   //   _newname: &OsStr,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("rename");
+  //   println!("{}", "rename".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -386,7 +375,7 @@ impl Filesystem for HelloFS {
   //   _newname: &OsStr,
   //   reply: ReplyEntry,
   // ) {
-  //   println!("link");
+  //   println!("{}", "link".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -405,7 +394,7 @@ impl Filesystem for HelloFS {
   //   _flags: u32,
   //   reply: ReplyWrite,
   // ) {
-  //   println!("write");
+  //   println!("{}", "write".red());
   //   reply.error(ENOSYS);
   // }
   // fn flush(
@@ -416,7 +405,7 @@ impl Filesystem for HelloFS {
   //   _lock_owner: u64,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("flush");
+  //   println!("{}", "flush".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -430,17 +419,17 @@ impl Filesystem for HelloFS {
   //   _flush: bool,
   //   reply: ReplyEmpty,
   // ) {
-  //   // println!("release");
+  //   println!("{}", "release".red());
   //   reply.ok();
   // }
   // fn fsync(&mut self, _req: &Request<'_>, _ino: u64, _fh: u64, _datasync: bool, reply: ReplyEmpty) {
-  //   println!("fsync");
+  //   println!("{}", "fsync".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn opendir(&mut self, _req: &Request<'_>, _ino: u64, _flags: u32, reply: ReplyOpen) {
-  //   // println!("opendir");
-  //   reply.opened(0, 0);
+  //   println!("{} {}", "opendir".blue(), _ino);
+  //   reply.opened(69, 0);
   // }
 
   // fn releasedir(
@@ -451,7 +440,7 @@ impl Filesystem for HelloFS {
   //   _flags: u32,
   //   reply: ReplyEmpty,
   // ) {
-  //   // println!("releasedir");
+  //   println!("{}", "releasedir".red());
   //   reply.ok();
   // }
 
@@ -463,12 +452,12 @@ impl Filesystem for HelloFS {
   //   _datasync: bool,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("fsyncdir");
+  //   println!("{}", "fsyncdir".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn statfs(&mut self, _req: &Request<'_>, _ino: u64, reply: ReplyStatfs) {
-  //   // println!("statfs");
+  //   println!("{} {}", "statfs".red(), _ino);
   //   reply.statfs(0, 0, 0, 0, 0, 512, 255, 0);
   // }
 
@@ -482,57 +471,17 @@ impl Filesystem for HelloFS {
   //   _position: u32,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("setxattr");
+  //   println!("{}", "setxattr".red());
   //   reply.error(ENOSYS);
   // }
 
-  fn getxattr(
-    &mut self,
-    _req: &Request<'_>,
-    _ino: u64,
-    _name: &OsStr,
-    _size: u32,
-    reply: ReplyXattr,
-  ) {
-    println!("getxattr {} {:?}", _ino, _name);
-    if _ino == 10 {
-      if _name == "com.apple.FinderInfo" {
-        reply.data(&hex_literal::hex!(
-          "69636F6E 4D414353 40100000 00000000 00000000 00000000 00000000 00000000"
-        ))
-      } else {
-        println!("{}", "start rendering".green());
-        let now = std::time::Instant::now();
-        let icon = self.icon_manager.load("https://example.com").unwrap();
-        println!(
-          "{} {:.2?} {}",
-          "done rendering".green(),
-          now.elapsed(),
-          icon.rsrc.len()
-        );
-        reply.data(&icon.rsrc)
-      }
-    } else {
-      reply.error(ENOATTR);
-    }
-  }
-
-  fn listxattr(&mut self, _req: &Request<'_>, _ino: u64, _size: u32, reply: ReplyXattr) {
-    println!("listxattr {}", _ino);
-    if _ino == 10 {
-      reply.data("com.apple.FinderInfo\u{0}com.apple.ResourceFork\u{0}".as_bytes());
-    } else {
-      reply.data("".as_bytes());
-    }
-  }
-
   // fn removexattr(&mut self, _req: &Request<'_>, _ino: u64, _name: &OsStr, reply: ReplyEmpty) {
-  //   println!("removexattr");
+  //   println!("{}", "removexattr".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn access(&mut self, _req: &Request<'_>, _ino: u64, _mask: u32, reply: ReplyEmpty) {
-  //   println!("access");
+  //   println!("{}", "access".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -545,7 +494,7 @@ impl Filesystem for HelloFS {
   //   _flags: u32,
   //   reply: ReplyCreate,
   // ) {
-  //   println!("create");
+  //   println!("{}", "create".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -561,7 +510,7 @@ impl Filesystem for HelloFS {
   //   _pid: u32,
   //   reply: ReplyLock,
   // ) {
-  //   println!("getlk");
+  //   println!("{}", "getlk".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -578,18 +527,18 @@ impl Filesystem for HelloFS {
   //   _sleep: bool,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("setlk");
+  //   println!("{}", "setlk".red());
   //   reply.error(ENOSYS);
   // }
 
   // fn bmap(&mut self, _req: &Request<'_>, _ino: u64, _blocksize: u32, _idx: u64, reply: ReplyBmap) {
-  //   println!("bmap");
+  //   println!("{}", "bmap".red());
   //   reply.error(ENOSYS);
   // }
 
   // #[cfg(target_os = "macos")]
   // fn setvolname(&mut self, _req: &Request<'_>, _name: &OsStr, reply: ReplyEmpty) {
-  //   println!("setvolname");
+  //   println!("{}", "setvolname".red());
   //   reply.error(ENOSYS);
   // }
 
@@ -604,13 +553,13 @@ impl Filesystem for HelloFS {
   //   _options: u64,
   //   reply: ReplyEmpty,
   // ) {
-  //   println!("exchange");
+  //   println!("{}", "exchange".red());
   //   reply.error(ENOSYS);
   // }
 
   // #[cfg(target_os = "macos")]
   // fn getxtimes(&mut self, _req: &Request<'_>, _ino: u64, reply: ReplyXTimes) {
-  //   println!("getxtimes");
+  //   println!("{}", "getxtimes".red());
   //   reply.error(ENOSYS);
   // }
 }
@@ -624,7 +573,9 @@ pub fn mount(icon_manager: IconManager) -> Result<(), Error> {
     "-o",
     "volname=GitHub",
     "-o",
-    "ovolicon=/Users/samdenty/Downloads/25231.icns",
+    "volicon=/Users/samdenty/Downloads/25231.icns",
+    "-o",
+    "allow_root",
   ]
   .iter()
   .map(|o| o.as_ref())
