@@ -1,7 +1,15 @@
 #![feature(proc_macro_hygiene)]
 #![feature(duration_constants)]
 extern crate icns;
-mod filesystem;
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
+
+mod database;
+mod fs;
 mod github;
 mod icon_manager;
 
@@ -35,15 +43,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
   //   .text()
   //   .await?;
 
-  let mut icon_manager = IconManager::new()?;
+  database::test().unwrap();
+  // std::process::Command::new("umount")
+  //   .arg("./test")
+  //   .spawn()
+  //   .expect("failed to unmount");
+
+  // let mut icon_manager = IconManager::new()?;
+  // fs::mount(icon_manager)?;
   // icon_manager.load("https://example.com")?;
 
   // database::test().unwrap();
-  let user = User::get(Arc::new("samdenty".into()))?;
+  // let user = User::get(Arc::new("samdenty".into()))?;
 
-  println!("{:?}", user);
-
-  filesystem::mount(icon_manager)?;
+  // println!("{:?}", user);
 
   Ok(())
 }

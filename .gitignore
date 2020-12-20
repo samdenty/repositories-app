@@ -4,3 +4,4 @@ test
 test2
 .DS_Store
 repositories
+*.db

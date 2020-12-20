@@ -1,10 +1,13 @@
-use crate::IconManager;
+mod path_parser;
+
+use crate::{IconManager, Repo, User};
 use fuse::FileType;
 use fuse_mt::FilesystemMT;
 use fuse_mt::*;
 use once_cell::sync::Lazy;
-use std::path::Path;
+use path_parser::{parse_path, PathKind};
 use std::{env, ffi::OsStr, io::Error};
+use std::{path::Path, sync::Arc};
 use time::Timespec;
 
 const TTL: Lazy<Timespec> = Lazy::new(|| Timespec::new(1, 0)); // 1 second
@@ -17,10 +20,30 @@ impl FilesystemMT for GitHubFS {
     println!("readdir {:?}", path);
     let mut entries: Vec<DirectoryEntry> = vec![];
 
-    entries.push(DirectoryEntry {
-      kind: FileType::Directory,
-      name: "samdenty".into(),
-    });
+    let path = parse_path(path);
+
+    match path {
+      PathKind::Root => {
+        entries.push(DirectoryEntry {
+          kind: FileType::Directory,
+          name: "samdenty".into(),
+        });
+      }
+
+      PathKind::User(login) => {
+        let user = User::get(&login).unwrap().unwrap();
+        for &repo_id in &user.repo_ids {
+          let repo = Repo::get(repo_id).unwrap().unwrap();
+          let repo_read = repo.read();
+
+          entries.push(DirectoryEntry {
+            kind: FileType::Directory,
+            name: repo_read.name.clone().into(),
+          })
+        }
+      }
+      _ => {}
+    }
 
     Ok(entries)
   }
@@ -86,7 +109,7 @@ pub fn mount(icon_manager: IconManager) -> Result<(), Error> {
   .iter()
   .map(|o| o.as_ref())
   .collect::<Vec<&OsStr>>();
-  let mountpoint = env::args_os().nth(1).unwrap();
+  let mountpoint = "./test"; //env::args_os().nth(1).unwrap();
 
   fuse_mt::mount(FuseMT::new(GitHubFS {}, 1), &mountpoint, &options)?;
 

@@ -1,4 +1,4 @@
-use super::{user::UserLogin, CLIENT};
+use super::CLIENT;
 use github_rs::client::Executor;
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 use std::{collections::HashSet, sync::Arc};
 
-const REPOS: Lazy<Database<HashMap<u32, RepoEntry>, FileBackend, Yaml>> =
-  Lazy::new(|| FileDatabase::load_from_path_or("/tmp/repos", HashMap::new()).unwrap());
+lazy_static! {
+  pub(super) static ref REPOS: Lazy<Database<HashMap<u32, RepoEntry>, FileBackend, Yaml>> =
+    Lazy::new(|| FileDatabase::load_from_path_or("/tmp/repos", HashMap::new()).unwrap());
+}
 
 pub type RepoEntry = Arc<RwLock<Repo>>;
 
@@ -22,11 +24,11 @@ pub struct Repo {
 }
 
 impl Repo {
-  pub fn load_for_user(login: UserLogin) -> Result<Vec<u32>, Box<dyn Error>> {
+  pub fn load_for_user(login: &str) -> Result<Vec<u32>, Box<dyn Error>> {
     let repos = CLIENT
       .get()
       .users()
-      .username(&login)
+      .username(login)
       .repos()
       .execute::<Vec<RepoResult>>()?
       .2
@@ -54,7 +56,7 @@ impl Repo {
   pub fn load(id: u32) -> Result<Option<RepoEntry>, Box<dyn Error>> {
     let (_, status, gh_repo) = CLIENT
       .get()
-      .custom_endpoint(&format!("/repositories/{}", id))
+      .custom_endpoint(&format!("repositories/{}", id))
       .execute::<RepoResult>()?;
 
     if status == 404 {
@@ -69,7 +71,7 @@ impl Repo {
     repo
   }
 
-  fn upsert(gh_repo: RepoResult) -> Result<RepoEntry, Box<dyn Error>> {
+  pub(super) fn upsert(gh_repo: RepoResult) -> Result<RepoEntry, Box<dyn Error>> {
     if let Some(repo) = REPOS.read(|entries| entries.get(&gh_repo.id).cloned())? {
       {
         let mut repo = repo.write();
@@ -90,14 +92,15 @@ impl Repo {
       is_fork: gh_repo.fork,
     }));
 
-    REPOS.write(|e| e.insert(id, repo.clone()))?;
+    REPOS.write(|repos| repos.insert(id, repo.clone()))?;
+
     Ok(repo)
   }
 }
 
-#[derive(Deserialize)]
-struct RepoResult {
-  id: u32,
+#[derive(Deserialize, Debug)]
+pub(super) struct RepoResult {
+  pub(super) id: u32,
   name: String,
   private: bool,
   fork: bool,
