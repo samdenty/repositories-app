@@ -43,20 +43,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
   //   .text()
   //   .await?;
 
-  database::test().unwrap();
-  // std::process::Command::new("umount")
-  //   .arg("./test")
-  //   .spawn()
-  //   .expect("failed to unmount");
-
-  // let mut icon_manager = IconManager::new()?;
-  // fs::mount(icon_manager)?;
-  // icon_manager.load("https://example.com")?;
-
   // database::test().unwrap();
-  // let user = User::get(Arc::new("samdenty".into()))?;
 
-  // println!("{:?}", user);
+  std::process::Command::new("umount")
+    .arg("./test")
+    .spawn()
+    .expect("failed to unmount");
+
+  let mut icon_manager = IconManager::new()?;
+  fs::mount(icon_manager)?;
+
+  // icon_manager.load("https://example.com")?;
 
   Ok(())
 }

@@ -31,14 +31,12 @@ impl FilesystemMT for GitHubFS {
       }
 
       PathKind::User(login) => {
-        let user = User::get(&login).unwrap().unwrap();
-        for &repo_id in &user.repo_ids {
-          let repo = Repo::get(repo_id).unwrap().unwrap();
-          let repo_read = repo.read();
+        let repos = Repo::get_for_user(&login).unwrap();
 
+        for repo in &repos {
           entries.push(DirectoryEntry {
             kind: FileType::Directory,
-            name: repo_read.name.clone().into(),
+            name: repo.name.clone().into(),
           })
         }
       }
@@ -78,7 +76,7 @@ impl FilesystemMT for GitHubFS {
   }
 
   fn statfs(&self, _req: RequestInfo, path: &Path) -> ResultStatfs {
-    println!("statfs: {:?}", path);
+    // println!("statfs: {:?}", path);
 
     Ok(Statfs {
       blocks: 0,

@@ -1,13 +1,12 @@
-pub mod models;
-pub mod schema;
+mod schema;
+pub use diesel::prelude::*;
+pub use schema::*;
 
-use diesel::prelude::*;
-use models::*;
+use crate::github::*;
 use once_cell::sync::Lazy;
-use schema::*;
 use std::error::Error;
 
-// const CONNECTION: Lazy<SqliteConnection> = Lazy::new(|| establish_connection());
+pub const DB: Lazy<SqliteConnection> = Lazy::new(|| establish_connection());
 
 embed_migrations!("./migrations");
 
@@ -22,7 +21,6 @@ fn establish_connection() -> SqliteConnection {
 }
 
 pub fn test() -> Result<(), Box<dyn Error>> {
-  let conn = establish_connection();
   // let new_post = NewPost {
   //   title: "hi2",
   //   body: "hi2",
@@ -46,13 +44,19 @@ pub fn test() -> Result<(), Box<dyn Error>> {
   //   .execute(&conn)
   //   .expect("Error saving new post");
 
-  let users = users::table.load::<User>(&conn)?;
+  let a = User {
+    name: "samdenty".into(),
+    description: None,
+  };
+  let b: User = a.save_changes(&*DB)?;
+
+  let users = users::table.load::<User>(&*DB)?;
   println!("{:?}", users);
   let user = users.get(0).ok_or("")?;
 
   // let repos = repos::table.load::<Repo>(&conn)?;
 
-  let repos = Repo::belonging_to(user).load::<Repo>(&conn)?;
+  let repos = Repo::belonging_to(user).load::<Repo>(&*DB)?;
 
   // let b = users::table.find("hi").get_result::<User>(&conn);
   println!("repo {:?}", repos);

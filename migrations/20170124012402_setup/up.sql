@@ -11,7 +11,8 @@ CREATE TABLE repos (
   private BOOLEAN NOT NULL,
   fork BOOLEAN NOT NULL,
   FOREIGN KEY(user_name) REFERENCES users(name),
-  UNIQUE(id)
+  UNIQUE(id),
+  UNIQUE(user_name, name)
 );
 CREATE TABLE tags (
   name TEXT NOT NULL PRIMARY KEY,
