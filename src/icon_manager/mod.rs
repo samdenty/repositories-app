@@ -6,12 +6,12 @@ use renderer::Renderer;
 use std::{
   collections::HashMap,
   io::{Cursor, Error},
-  rc::Rc,
+  sync::Arc,
 };
 
 pub struct IconManager {
   renderer: Renderer,
-  cache: HashMap<String, Rc<Icon>>,
+  cache: HashMap<String, Arc<Icon>>,
 }
 
 impl IconManager {
@@ -22,12 +22,12 @@ impl IconManager {
     })
   }
 
-  pub fn load(&mut self, url: &str) -> Result<Rc<Icon>, Error> {
+  pub fn load(&mut self, url: &str) -> Result<Arc<Icon>, Error> {
     if let Some(icon) = self.cache.get(url) {
       return Ok(icon.clone());
     }
 
-    println!("{}", "start rendering".green());
+    println!("{} {}", "start rendering".green(), url);
     let now = std::time::Instant::now();
 
     let icon_renderer = self.renderer.load(url)?;
@@ -43,7 +43,7 @@ impl IconManager {
     icon_family.write(&mut icns).unwrap();
     let rsrc = rsrc::encode(&icns)?;
 
-    let icon = Rc::new(Icon { icns, rsrc });
+    let icon = Arc::new(Icon { icns, rsrc });
 
     self.cache.insert(url.to_string(), icon.clone());
 

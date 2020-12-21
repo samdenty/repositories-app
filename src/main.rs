@@ -1,10 +1,11 @@
-#![feature(proc_macro_hygiene)]
-#![feature(duration_constants)]
+#![feature(proc_macro_hygiene, duration_constants)]
 extern crate icns;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate hex_literal;
 #[macro_use]
 extern crate diesel_migrations;
 

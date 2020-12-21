@@ -70,10 +70,10 @@ impl IconRenderer {
       })
       .expect("failed sizing window");
 
-    self
-      .tab
-      .wait_for_element("body")
-      .expect("failed waiting for page to load");
+    // self
+    //   .tab
+    //   .wait_for_element("body")
+    //   .expect("failed waiting for page to load");
 
     let data = self
       .tab

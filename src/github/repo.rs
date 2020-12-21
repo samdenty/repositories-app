@@ -78,7 +78,9 @@ impl Repo {
 
     let repo = repo.ok_or("failed to fetch repo")?;
 
-    diesel::insert_into(repos::table).values(&repo);
+    diesel::insert_into(repos::table)
+      .values(&repo)
+      .execute(&*DB)?;
 
     Ok(Some(repo))
   }
