@@ -4,15 +4,16 @@ use headless_chrome::protocol::Method;
 use headless_chrome::Tab;
 use headless_chrome::{protocol::page::ScreenshotFormat, Browser, LaunchOptionsBuilder};
 use serde::Serialize;
+use std::error::Error;
 use std::sync::Arc;
-use std::{io::Error, time::Duration};
+use std::time::Duration;
 
 pub struct Renderer {
   browser: Browser,
 }
 
 impl Renderer {
-  pub fn new() -> Result<Self, Error> {
+  pub fn new() -> Result<Self, Box<dyn Error>> {
     let launch_options = LaunchOptionsBuilder::default()
       .idle_browser_timeout(Duration::MAX)
       .build()
@@ -22,28 +23,23 @@ impl Renderer {
     Ok(Renderer { browser })
   }
 
-  pub fn load(&self, url: &str) -> Result<IconRenderer, Error> {
-    let tab = self
-      .browser
-      .new_tab_with_options(CreateTarget {
-        url,
-        width: None,
-        height: None,
-        browser_context_id: None,
-        enable_begin_frame_control: None,
-      })
-      .expect("failed to load iconRenderer");
+  pub fn load(&self, url: &str) -> Result<IconRenderer, Box<dyn Error>> {
+    let tab = self.browser.new_tab_with_options(CreateTarget {
+      url,
+      width: None,
+      height: None,
+      browser_context_id: None,
+      enable_begin_frame_control: None,
+    })?;
 
-    tab
-      .call_method(SetDefaultBackgroundColorOverride {
-        color: Color {
-          r: 0,
-          g: 0,
-          b: 0,
-          a: 0,
-        },
-      })
-      .expect("failed to communicate with browser");
+    tab.call_method(SetDefaultBackgroundColorOverride {
+      color: Color {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+      },
+    })?;
 
     Ok(IconRenderer::new(tab))
   }
@@ -58,17 +54,14 @@ impl IconRenderer {
     IconRenderer { tab }
   }
 
-  pub fn render(&self, resolution: u32) -> Result<Vec<u8>, Error> {
+  pub fn render(&self, resolution: u32) -> Result<Vec<u8>, Box<dyn Error>> {
     let now = std::time::Instant::now();
-    self
-      .tab
-      .set_bounds(Bounds::Normal {
-        height: Some(resolution / 2),
-        width: Some(resolution / 2),
-        left: None,
-        top: None,
-      })
-      .expect("failed sizing window");
+    self.tab.set_bounds(Bounds::Normal {
+      height: Some(resolution / 2),
+      width: Some(resolution / 2),
+      left: None,
+      top: None,
+    })?;
 
     // self
     //   .tab
@@ -77,8 +70,7 @@ impl IconRenderer {
 
     let data = self
       .tab
-      .capture_screenshot(ScreenshotFormat::PNG, None, true)
-      .expect("failed capturing screenshot");
+      .capture_screenshot(ScreenshotFormat::PNG, None, true)?;
 
     println!("{}px {:.2?}", resolution, now.elapsed());
     Ok(data)

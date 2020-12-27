@@ -22,6 +22,22 @@ pub struct Repo {
 impl Repo {
   pub fn load_for_user(login: &str) -> Result<Vec<Repo>, Box<dyn Error>> {
     use self::repos::dsl::*;
+
+    // let a = || -> Result<(), Box<dyn Error>> {
+    //   let (_, status, repo) = CLIENT
+    //     .get()
+    //     .custom_endpoint(&format!("repositories/{}", id))
+    //     .execute::<Vec<NewRepo>>()?;
+    //   let all_repos = CLIENT
+    //     .get()
+    //     .users()
+    //     .username(login)
+    //     .repos()
+    //     .execute::<Vec<NewRepo>>()?;
+
+    //   Ok(())
+    // };
+
     let all_repos = CLIENT
       .get()
       .users()

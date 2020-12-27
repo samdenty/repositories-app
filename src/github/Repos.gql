@@ -1,0 +1,12 @@
+query Repos($owner) {
+  organization(login: "microsoft") {
+    repositories(first: 100,after:"Y3Vyc29yOnYyOpHOAZ_Lsw==") {
+      pageInfo {
+        endCursor
+      }
+      nodes {
+        name
+      }
+    }
+  }
+}
