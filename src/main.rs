@@ -29,6 +29,9 @@ pub struct Organization {
 
 // #[tokio::main]
 fn main() -> Result<(), Box<dyn Error>> {
+    env_logger::init();
+    color_backtrace::install();
+
     // let client = reqwest::Client::builder()
     //   .proxy(reqwest::Proxy::http("http://localhost:9090")?)
     //   .build()?;
@@ -53,10 +56,19 @@ fn main() -> Result<(), Box<dyn Error>> {
         .spawn()
         .expect("failed to unmount");
 
-    let mut icon_manager = IconManager::new()?;
+    let icon_manager = IconManager::new()?;
     fs::mount(icon_manager)?;
 
-    // icon_manager.load("https://example.com")?;
+    // let browser = headless_chrome::Browser::default().unwrap();
+    // let tab = browser.new_tab().unwrap();
+    // drop(browser);
+
+    // tab.navigate_to("https://google.com").unwrap();
+
+    // let a = icon_manager
+    //     .load_repo("http://127.0.0.1:8081/a.html")
+    //     .unwrap();
+    // std::fs::write("./test.icns", a.icns.clone())?;
 
     Ok(())
 }

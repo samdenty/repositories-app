@@ -1,5 +1,6 @@
 mod path;
 
+use chrono::{DateTime, Local};
 use fuse::FileType;
 use fuse_mt::*;
 use once_cell::sync::Lazy;
@@ -41,7 +42,18 @@ impl FilesystemMT for GitHubFS {
 
         match path {
             path::Kind::Root => {
-                for name in vec!["samdenty", "microsoft", "facebook", "google", "surma"] {
+                for name in vec![
+                    "samdenty",
+                    // "microsoft",
+                    // "facebook",
+                    // "google",
+                    // "surma",
+                    // "gaearon",
+                    // "samyk",
+                    // "ranahanocka",
+                    // "sindresorhus",
+                    // "wfraser",
+                ] {
                     entries.push(DirectoryEntry {
                         kind: FileType::Directory,
                         name: name.into(),
@@ -187,9 +199,21 @@ impl FilesystemMT for GitHubFS {
                     path::Icon::User(user) => {
                         // let mut icon_manager = self.icon_manager.lock().ok().ok_or(-1)?;
 
-                        let icon = self.icon_manager.load_user(user).await;
+                        let dt: DateTime<Local> = Local::now();
+                        let icon = self
+                            .icon_manager
+                            .load_repo(&if user == "samdenty" {
+                                "https://cdpn.io/dhanishgajjar/fullpage/eERdyr".to_string()
+                            } else {
+                                format!(
+                                    "http://127.0.0.1:8081/a.html?repo={}&label={}",
+                                    user,
+                                    dt.format("%R")
+                                )
+                            })
+                            .unwrap();
                         // Some(icon.rsrc.clone())
-                        icon.ok().map(|icon| icon.rsrc.clone())
+                        Some(icon.rsrc.clone())
                     }
                     path::Icon::Repo(user, repo) => {
                         // let mut icon_manager = self.icon_manager.lock().ok().ok_or(-1)?;
