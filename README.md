@@ -1,4 +1,6 @@
-# repositories-app
+# repositories-app (super wip!)
+
+![File icons](./screenshots/File%20icons.png)
 
 Every developer has a local projects folder. It's most likely a complete mess with a myriad of different folders. This app aims to fix that. It automatically adds icons, smart sorting and is always up-to-date with the repositories on GitHub.
 

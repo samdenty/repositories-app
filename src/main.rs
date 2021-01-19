@@ -1,11 +1,15 @@
 #![feature(
-    proc_macro_hygiene,
-    duration_constants,
-    async_closure,
-    impl_trait_in_bindings
+  proc_macro_hygiene,
+  duration_constants,
+  async_closure,
+  impl_trait_in_bindings
 )]
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate serde_with;
+#[macro_use]
+extern crate serde;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
@@ -13,62 +17,72 @@ extern crate hex_literal;
 #[macro_use]
 extern crate diesel_migrations;
 
+mod api;
 mod database;
 mod fs;
 mod github;
 mod icon_manager;
+mod macros;
 
+use github::Repo;
+use github::Tree;
 use icon_manager::IconManager;
 use serde::Deserialize;
 use std::error::Error;
 
 #[derive(Deserialize, Debug)]
 pub struct Organization {
-    login: String,
+  login: String,
 }
 
 // #[tokio::main]
 fn main() -> Result<(), Box<dyn Error>> {
-    env_logger::init();
-    color_backtrace::install();
+  env_logger::init();
+  color_backtrace::install();
 
-    // let client = reqwest::Client::builder()
-    //   .proxy(reqwest::Proxy::http("http://localhost:9090")?)
-    //   .build()?;
+  let now = std::time::Instant::now();
+  // let a = Repo::get("alainm23", "planner")
+  //   .await?
+  //   .ok_or("")?
+  //   .get_icons()
+  //   .await?;
 
-    // let resp = client
-    //   .get("https://api.github.com/user/orgs")
-    //   .header("User-Agent", "repositories")
-    //   .header(
-    //     "Authorization",
-    //     "token 967d100d7152d2d1cb9e720e5efd06f9c9b836d4",
-    //   )
-    //   .send()
-    //   .await?
-    //   .json::<HashMap<String, String>>()
-    //   .text()
-    //   .await?;
+  // let a = Tree::get(
+  //   "samdenty",
+  //   "console-feed",
+  //   "9c9469cfe8b26e321fc4f3b6669c22ad1360e193",
+  // )
+  // .await?;
 
-    // database::test().unwrap();
+  // println!("{:?} {:.2?}", a, now.elapsed());
 
-    std::process::Command::new("umount")
-        .arg("./test")
-        .spawn()
-        .expect("failed to unmount");
+  type B<'r> = Result<&'r [u8], u16>;
+  fn test<'a>() -> B<'a> {
+    Ok(&[1, 2][..])
+  }
 
-    let icon_manager = IconManager::new()?;
-    fs::mount(icon_manager)?;
+  let x = test();
+  let b = x.unwrap();
+  let a = &mut [1, 2][..] as *mut [i32];
 
-    // let browser = headless_chrome::Browser::default().unwrap();
-    // let tab = browser.new_tab().unwrap();
-    // drop(browser);
+  std::process::Command::new("umount")
+    .arg("./test")
+    .spawn()
+    .expect("failed to unmount");
 
-    // tab.navigate_to("https://google.com").unwrap();
+  let icon_manager = IconManager::new()?;
+  fs::mount(icon_manager)?;
 
-    // let a = icon_manager
-    //     .load_repo("http://127.0.0.1:8081/a.html")
-    //     .unwrap();
-    // std::fs::write("./test.icns", a.icns.clone())?;
+  // let browser = headless_chrome::Browser::default().unwrap();
+  // let tab = browser.new_tab().unwrap();
+  // drop(browser);
 
-    Ok(())
+  // tab.navigate_to("https://google.com").unwrap();
+
+  // let a = icon_manager
+  //     .load_repo("http://127.0.0.1:8081/a.html")
+  //     .unwrap();
+  // std::fs::write("./test.icns", a.icns.clone())?;
+
+  Ok(())
 }

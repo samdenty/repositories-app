@@ -1,4 +1,7 @@
-use std::path::Path;
+use crate::regex;
+use once_cell::sync::Lazy;
+use regex::Regex;
+use std::{error::Error, path::Path};
 
 #[derive(Debug)]
 pub enum Icon {
@@ -11,37 +14,47 @@ pub enum Kind {
   Root,
   Icon(Icon),
   User(String),
-  Repo(String, String),
-  Content(String, String, String),
+  DefaultTree(String, String, String),
+  CustomTree(String, String, String),
 }
 
-pub fn parse(path: &Path) -> Kind {
-  let path: Vec<_> = path
-    .iter()
-    .map(|p| p.to_str().unwrap().to_string())
-    .collect();
+pub fn parse(path: &Path) -> Result<Kind, Box<dyn Error>> {
+  let path: Vec<_> = path.iter().map(|p| p.to_str().unwrap()).collect();
+  let is_icon = path.last() == Some(&"Icon\r");
 
-  let user = || path.get(1).unwrap().into();
-  let repo = || path.get(2).unwrap().into();
+  if path.len() == 1 {
+    return Ok(Kind::Root);
+  }
 
-  if let Some(last) = path.last() {
-    if last == "Icon\r" {
-      match path.len() {
-        3 => return Kind::Icon(Icon::User(user())),
-        4 => return Kind::Icon(Icon::Repo(user(), repo())),
+  let owner: String = path[1].into();
+  if !regex!(r"^([a-z\d]+-)*[a-z\d]+$").is_match(&owner) {
+    return Err("invalid username".into());
+  };
 
-        _ => {}
-      }
+  if path.len() == 2 {
+    return Ok(Kind::User(owner));
+  }
+
+  let repo = path[2].into();
+  if !regex!(r"^([A-Za-z0-9_.-]){0,100}$").is_match(&owner) {
+    return Err("invalid repo name".into());
+  };
+
+  if is_icon {
+    match path.len() {
+      3 => return Ok(Kind::Icon(Icon::User(owner))),
+      4 => return Ok(Kind::Icon(Icon::Repo(owner, repo))),
+      _ => {}
     }
   }
 
-  match path.len() {
-    1 => Kind::Root,
-    2 => Kind::User(user()),
-    3 => Kind::Repo(user(), repo()),
-    _ => {
-      let content_path: Vec<String> = path[3..].iter().map(|p| p.into()).collect();
-      Kind::Content(user(), repo(), content_path.join("/"))
+  let path = &path[3..];
+
+  match path.get(0).cloned() {
+    Some("^tree") => {
+      let path = &path[0..];
+      Ok(Kind::CustomTree(owner, repo, path.join("/")))
     }
+    _ => Ok(Kind::DefaultTree(owner, repo, path.join("/"))),
   }
 }
