@@ -1,0 +1,38 @@
+{
+  "name": "extension",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "cd scripts; TS_NODE_TRANSPILE_ONLY=true webpack"
+  },
+  "dependencies": {
+    "@types/chrome": "^0.0.128",
+    "github-reserved-names": "^2.0.4",
+    "svelte": "^3.31.2",
+    "webextension-polyfill-ts": "^0.22.0"
+  },
+  "devDependencies": {
+    "@tsconfig/svelte": "^1.0.10",
+    "@types/mini-css-extract-plugin": "^1.2.2",
+    "@types/node": "^14.14.21",
+    "@types/webpack": "^4.41.26",
+    "css-loader": "^5.0.1",
+    "file-loader": "^6.2.0",
+    "fork-ts-checker-webpack-plugin": "^6.1.0",
+    "html-webpack-plugin": "^4.5.1",
+    "mini-css-extract-plugin": "^1.3.4",
+    "node-sass": "^5.0.0",
+    "sass-loader": "^10.1.1",
+    "style-loader": "^2.0.0",
+    "svelte-loader": "^2.13.6",
+    "svelte-preprocess": "^4.6.1",
+    "svelte-preprocess-sass": "^1.0.0",
+    "ts-loader": "^8.0.14",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3",
+    "webpack": "^4",
+    "webpack-cli": "^4.3.1",
+    "webpack-extension-reloader": "^1.1.4"
+  }
+}
