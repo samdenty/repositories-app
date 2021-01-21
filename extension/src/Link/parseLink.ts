@@ -1,55 +1,50 @@
 import * as reservedNames from "github-reserved-names";
 
-reservedNames.all.push("codespaces");
-
-export enum LinkType {
-  User = "User",
-  Repo = "Repo",
-  File = "File",
-  Folder = "Folder",
-}
-
 export interface User {
-  type: LinkType.User;
+  type: "User";
   user: string;
 }
 
 export interface Repo {
-  type: LinkType.Repo;
+  type: "Repo";
+  user: string;
   repo: string;
 }
 
 export interface File {
-  type: LinkType.File;
+  type: "File";
   user: string;
   repo: string;
-  ref: string;
+  tree: string;
   path: string;
 }
 
 export interface Folder {
-  type: LinkType.Folder;
+  type: "Folder";
   user: string;
   repo: string;
-  ref: string;
+  tree: string;
   path?: string;
 }
 
 export type LinkData = User | Repo | Folder | File;
+export type FolderLike = User | Repo | Folder;
 
-export function parseLink(element: HTMLAnchorElement) {
+reservedNames.all.push("codespaces");
+
+export function parseLink(element: HTMLAnchorElement): LinkData | undefined {
   const url = new URL(element.href);
   if (url.hostname !== "github.com") return;
   if (url.hash) return;
 
   const result = url.pathname.match(
-    /^\/(?<user>[^/]+)(?:\/(?:(?<repo>[^/]+)(?:\/(?:(?<type>blob|tree)\/(?<ref>[^/]+)(?:\/(?<path>.*))?)?)?)?)?$/
+    /^\/(?<user>[^/]+)(?:\/(?:(?<repo>[^/]+)(?:\/(?:(?<type>blob|tree)\/(?<tree>[^/]+)(?:\/(?<path>.*))?)?)?)?)?$/
   )?.groups as
     | {
         user: string;
         repo?: string;
         type?: "blob" | "tree";
-        ref?: string;
+        tree?: string;
         path?: string;
       }
     | undefined;
@@ -57,18 +52,28 @@ export function parseLink(element: HTMLAnchorElement) {
 
   const { user } = result;
   if (reservedNames.check(user)) return;
-  if (!result.repo) return { type: LinkType.User, user };
+  if (!result.repo) return { type: "User", user };
 
   const { repo } = result;
-  if (!result.type) return { type: LinkType.Repo, user, repo };
+  if (!result.type) return { type: "Repo", user, repo };
 
-  if (result.type === "blob" && !result.path) return;
+  if (result.type === "blob") {
+    if (!result.path) return;
+
+    return {
+      type: "File",
+      user,
+      repo,
+      tree: result.tree!,
+      path: result.path,
+    };
+  }
 
   return {
-    type: result.type === "blob" ? LinkType.File : LinkType.Folder,
+    type: "Folder",
     user,
     repo,
-    ref: result.ref,
+    tree: result.tree!,
     path: result.path,
   };
 }

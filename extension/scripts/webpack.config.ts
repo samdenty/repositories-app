@@ -12,7 +12,7 @@ const config: webpack.Configuration = {
   target: "web",
   context: path.resolve(".."),
   entry: {
-    background: "./src/background",
+    background: "./src/background/background",
     content: "./src/content/content",
   },
   devtool: "source-map",

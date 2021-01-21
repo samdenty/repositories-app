@@ -18,13 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const link = parseLink(element);
     if (!link) return;
 
-    const children = element.innerHTML;
+    const childNodes = Array.from(element.childNodes);
     element.innerHTML = "";
 
     new Link({
       target: element,
       props: {
-        children,
+        childNodes,
         link,
         href: element.href,
       },

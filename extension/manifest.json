@@ -7,7 +7,13 @@
     "scripts": ["dist/background.js"],
     "persistent": true
   },
-  "permissions": ["file:///*", "http://*/*", "https://*/*", "nativeMessaging"],
+  "permissions": [
+    "file:///*",
+    "http://*/*",
+    "https://*/*",
+    "nativeMessaging",
+    "system.display"
+  ],
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
@@ -15,5 +21,10 @@
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": ["dist/*"]
+  "web_accessible_resources": ["dist/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "repositories@samdenty.com"
+    }
+  }
 }
