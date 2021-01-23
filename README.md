@@ -1,6 +1,6 @@
 # repositories-app
 
-This project is WIP, and not ready for usage yet.
+In development... Not ready for usage currently
 
 A Mac app which allows you to access any file / folder on github, without cloning.
 
