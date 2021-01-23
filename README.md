@@ -1,6 +1,6 @@
 # repositories-app
 
-In development... Not ready for usage currently
+In r&d phase... so not ready for usage just yet. Will be released as freemium. You can [sponsor](https://github.com/sponsors/samdenty) to get access to full version once released.
 
 A Mac app which allows you to access any file / folder on github, without cloning.
 
