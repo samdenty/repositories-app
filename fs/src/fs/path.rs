@@ -4,18 +4,18 @@ use regex::Regex;
 use std::{error::Error, path::Path};
 
 #[derive(Debug)]
-pub enum Icon {
-  User(String),
-  Repo(String, String),
+pub enum Icon<'a> {
+  User(&'a str),
+  Repo(&'a str, &'a str),
 }
 
 #[derive(Debug)]
-pub enum Kind {
+pub enum Kind<'a> {
   Root,
-  Icon(Icon),
-  User(String),
-  DefaultTree(String, String, String),
-  CustomTree(String, String, String),
+  Icon(Icon<'a>),
+  User(&'a str),
+  DefaultTree(&'a str, &'a str, String),
+  CustomTree(&'a str, &'a str, String),
 }
 
 pub fn parse(path: &Path) -> Result<Kind, Box<dyn Error>> {
@@ -26,8 +26,8 @@ pub fn parse(path: &Path) -> Result<Kind, Box<dyn Error>> {
     return Ok(Kind::Root);
   }
 
-  let owner: String = path[1].into();
-  if !regex!(r"^([a-z\d]+-)*[a-z\d]+$").is_match(&owner) {
+  let owner = path[1];
+  if !regex!(r"^([a-z\d]+-)*[a-z\d]+$").is_match(owner) {
     return Err("invalid username".into());
   };
 
@@ -35,10 +35,14 @@ pub fn parse(path: &Path) -> Result<Kind, Box<dyn Error>> {
     return Ok(Kind::User(owner));
   }
 
-  let repo = path[2].into();
-  if !regex!(r"^([A-Za-z0-9_.-]){0,100}$").is_match(&owner) {
+  let repo = path[2];
+  if !regex!(r"^([A-Za-z0-9_.-]){0,100}$").is_match(owner) {
     return Err("invalid repo name".into());
   };
+
+  if [".git", "node_modules"].contains(&repo) {
+    return Err("reserved name".into());
+  }
 
   if is_icon {
     match path.len() {

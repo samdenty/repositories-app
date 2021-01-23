@@ -1,0 +1,53 @@
+[package]
+authors = ["Sam Denty <sam@samdenty.com>"]
+edition = "2018"
+name = "repositories"
+version = "0.1.0"
+
+[[bin]]
+name = "native_message_host"
+doc = false
+
+[dependencies]
+byteorder = "1.3.4"
+open_in_editor = "0.2.0"
+colored = { git = "https://github.com/tforgione/colored.git", branch = "master" }
+diesel = { git = "https://github.com/diesel-rs/diesel", features = ["sqlite", "r2d2"] }
+diesel_migrations = { git = "https://github.com/diesel-rs/diesel" }
+failure = "0.1.8"
+thread_local = "1.1.0"
+graphql_client = "0.9.0"
+image = "0.23.12"
+chrome_native_messaging = "0.2.0"
+lazy_static = "1.4.0"
+chrono = "0.4"
+regex = "1"
+lru = "0.6.3"
+relative-path = "1.3.2"
+derive_builder = "0.9.0"
+fuse = "0.3.1"
+fuse_mt = { git = "https://github.com/samdenty/fuse-mt", branch = "tokio-1.0" }
+github-rs = "0.7.0"
+headless_chrome = { git = "https://github.com/samdenty/rust-headless-chrome" }
+hex-literal = "0.3.1"
+icns = { git = "https://github.com/samdenty/rust-icns", branch = "image-rs" }
+libc = "0.2.81"
+once_cell = "1.5.2"
+parking_lot = { version = "0.11.1", features = ["serde"] }
+rustbreak = { version = "2.0.0", features = ["yaml_enc"] }
+serde = { version = "1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
+reqwest = { git = "https://github.com/messense/reqwest", branch = "tokio-0-3", features = ["json", "blocking", "stream"] }
+futures = "0.3.8"
+sled = "0.34.6"
+log = "0.4"
+api = { path = "../api" }
+env_logger = "0.8.2"
+serde_with = "1.6.0"
+time = "0.1"
+color-backtrace = { version = "0.5" }
+tokio = { version = "1.0.1", features = ["full"] }
+tokio-util = { version = "0.6.0", features = ["io"] }
+
+[dev-dependencies]
+env_logger = "0.8.2"

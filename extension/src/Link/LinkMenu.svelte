@@ -40,6 +40,11 @@
 </script>
 
 <Menu {x} {y} on:close>
+  <MenuItem on:click={openLinkInNewTab}>Open Link in New Tab</MenuItem>
+  <MenuItem on:click={copyLinkAddress}>Copy Link Address</MenuItem>
+
+  <MenuDivider />
+
   {#if link.type === "File"}
     <MenuItem on:click={openInEditor}
       >Open {(() => {
@@ -60,11 +65,6 @@
     <MenuItem on:click={revealInFinder}>Reveal in Finder</MenuItem>
     <MenuItem on:click={openInTerminal}>Open in Terminal</MenuItem>
   {/if}
-
-  <MenuDivider />
-
-  <MenuItem on:click={openLinkInNewTab}>Open Link in New Tab</MenuItem>
-  <MenuItem on:click={copyLinkAddress}>Copy Link Address</MenuItem>
 
   <MenuDivider />
 

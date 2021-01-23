@@ -1,6 +1,7 @@
 use super::User;
 use super::CLIENT;
-use crate::{api::get_icons, database::*, github_api};
+use crate::{database::*, github_api};
+use api::icons::get_icons;
 use github_rs::client::Executor;
 use serde::Deserializer;
 use serde::{Deserialize, Serialize};

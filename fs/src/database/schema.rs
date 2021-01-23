@@ -61,12 +61,4 @@ joinable!(repo_tags -> tags (tag_name));
 joinable!(repos -> users (owner));
 joinable!(trees -> blobs (blob_sha));
 
-allow_tables_to_appear_in_same_query!(
-    blobs,
-    repo_branches,
-    repo_tags,
-    repos,
-    tags,
-    trees,
-    users,
-);
+allow_tables_to_appear_in_same_query!(blobs, repo_branches, repo_tags, repos, tags, trees, users,);

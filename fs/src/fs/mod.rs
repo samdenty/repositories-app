@@ -65,7 +65,7 @@ impl FilesystemMT for GitHubFS {
       }
 
       path::Kind::User(owner) => {
-        let repos = UserRepos::get(&owner).await.map_err(|_| libc::ENOENT)?;
+        let repos = UserRepos::get(owner).await.map_err(|_| libc::ENOENT)?;
 
         for repo in &repos {
           entries.push(DirectoryEntry {
@@ -81,7 +81,7 @@ impl FilesystemMT for GitHubFS {
       }
 
       path::Kind::DefaultTree(owner, repo, path) => {
-        let branch = Branch::get_default(&owner, &repo)
+        let branch = Branch::get_default(owner, repo)
           .await
           .map_err(|_| libc::ENOENT)?;
         let tree = branch.get_dir(&path).await.map_err(|_| libc::ENOENT)?;
@@ -204,11 +204,11 @@ impl FilesystemMT for GitHubFS {
           ));
         }
 
-        let branch = Branch::get_default(&owner, &repo)
+        let branch = Branch::get_default(owner, repo)
           .await
           .map_err(|_| libc::ENOENT)?;
         let entry = branch.get_entry(&path).await.map_err(|_| libc::ENOENT)?;
-        let blob = entry.blob(&owner, &repo).await.unwrap();
+        let blob = entry.blob(owner, repo).await.unwrap();
 
         Ok((
           *TTL,
@@ -245,19 +245,23 @@ impl FilesystemMT for GitHubFS {
           path::Icon::User(user) => {
             // let mut icon_manager = self.icon_manager.lock().ok().ok_or(-1)?;
 
-            // let icon = self
-            //   .icon_manager
-            //   .load_repo(&format!("http://127.0.0.1:8081/a.html?repo={}", user,));
-            // icon.ok().map(|icon| icon.rsrc.clone())
-            Some(Vec::new())
+            let icon = self
+              .icon_manager
+              .load_repo(&format!("http://127.0.0.1:8080/a.html?repo={}", user,));
+            icon.ok().map(|icon| icon.rsrc.clone())
+            // Some(Vec::new())
           }
           path::Icon::Repo(user, repo) => {
             // let mut icon_manager = self.icon_manager.lock().ok().ok_or(-1)?;
-            // let icon = icon_manager
-            //     .load_repo(&format!("https://github.com/{}/{}", user, repo));
+            // let icon = self
+            //   .icon_manager
+            //   .load_repo(&format!("https://github.com/{}/{}", user, repo));
+            let icon = self
+              .icon_manager
+              .load_repo(&format!("http://127.0.0.1:8080/a.html?repo={}", user,));
 
-            // icon.ok().map(|icon| icon.rsrc.clone())
-            Some(Vec::new())
+            icon.ok().map(|icon| icon.rsrc.clone())
+            // Some(Vec::new())
           }
         },
         _ => None,
@@ -315,20 +319,13 @@ impl FilesystemMT for GitHubFS {
 
     match path {
       path::Kind::DefaultTree(owner, repo, path) => {
-        let branch = Branch::get_default(&owner, &repo)
+        let branch = Branch::get_default(owner, repo)
           .await
           .map_err(|_| libc::ENOENT)?;
         let tree = branch.get_entry(&path).await.map_err(|_| libc::ENOENT)?;
-        let blob = tree
-          .blob(&owner, &repo)
-          .await
-          .unwrap()
-          .ok_or(libc::EISDIR)?;
+        let blob = tree.blob(owner, repo).await.unwrap().ok_or(libc::EISDIR)?;
 
-        let data = blob
-          .get_data(&owner, &repo)
-          .await
-          .map_err(|_| libc::ENOENT)?;
+        let data = blob.get_data(owner, repo).await.map_err(|_| libc::ENOENT)?;
 
         Ok(data[offset as usize..offset as usize + size as usize].to_vec())
       }
