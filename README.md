@@ -1,24 +1,29 @@
-# repositories-app (super wip!)
+# repositories-app
+
+**This project is super WIP, and not ready for usage yet.**
+
+A Mac app which allows you to access any file / folder on github, without cloning.
+
+Creates a virtual `GitHub` folder in your home directory. Files from repos can be accessed using paths like `~/GitHub/username/repo/README.md`. When filesystem operations are performed, the results are cached and persisted to a local database.
+
+<a href="https://www.youtube.com/watch?v=gNhPOx4m19M">
+  <img src="https://yt-embed.herokuapp.com/embed?v=gNhPOx4m19M" width="200" alt="Prototype">
+</a>
+
+All user folders have icons sourced from GitHub:
+
+![User icons](./screenshots/User%20icons.png)
+
+Repo folders have icons sourced from automatically crawling the linked website / README:
+
+![Pathbar](./screenshots/Pathbar.png)
+
+And all files use the same icon pack that you use in your IDE:
 
 ![File icons](./screenshots/File%20icons.png)
 
-Every developer has a local projects folder. It's most likely a complete mess with a myriad of different folders. This app aims to fix that. It automatically adds icons, smart sorting and is always up-to-date with the repositories on GitHub.
-
----
-
-A mac app which allows you to access any file from github, without cloning.
-
-Uses osxfuse to create a virtual GitHub folder in your home directory.
-Inside it, you'll find folders of the organizations you belong to along with your username.
-`~/GitHub/username/repo/README.md` for example.
-
-The folders all have icons that are automatically sourced from GitHub.
-The icons are rendered on-demand with puppeteer (resizing the browser window for each resolution).
-
-The finder icons for your repos are just a React page, which you can customize in code to display a preview of the website, badges, star count etc.
-
-They periodically update to show new information.
-
 ## Chrome extension
 
-A chrome extension will allow you to double click on any file on GitHub and open it instantly in Finder, VSCode etc. without cloning.
+A chrome extension allows you to right click on any file on GitHub and open it instantly in Finder, VSCode etc. without cloning.
+
+![Context menus](./screenshots/Context%20menus.png)
