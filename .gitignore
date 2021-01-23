@@ -6,5 +6,3 @@ test2
 repositories
 *.db
 .idea
-/api
-/worker
