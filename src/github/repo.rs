@@ -24,7 +24,7 @@ impl UserRepos {
         .on_conflict((owner, name))
         .do_update()
         .set(repo)
-        .execute(&*DB)?;
+        .execute(db())?;
     }
 
     Ok(all_repos)
@@ -33,7 +33,7 @@ impl UserRepos {
   pub async fn get(owner_name: &str) -> Result<Vec<Repo>, Box<dyn Error>> {
     let get_repos = || {
       use self::repos::dsl::*;
-      repos.filter(owner.like(owner_name)).load::<Repo>(&*DB)
+      repos.filter(owner.like(owner_name)).load::<Repo>(db())
     };
 
     let mut all_repos = get_repos()?;
@@ -65,7 +65,7 @@ impl Repo {
       use self::repos::dsl::*;
       repos
         .filter(owner.like(owner_name).and(name.like(repo_name)))
-        .first::<Repo>(&*DB)
+        .first::<Repo>(db())
     };
 
     match get_repo() {
@@ -91,7 +91,7 @@ impl Repo {
 
     diesel::insert_into(repos::table)
       .values(&repo)
-      .execute(&*DB)?;
+      .execute(db())?;
 
     Ok(repo)
   }

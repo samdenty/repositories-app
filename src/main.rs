@@ -56,15 +56,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
   // println!("{:?} {:.2?}", a, now.elapsed());
 
-  type B<'r> = Result<&'r [u8], u16>;
-  fn test<'a>() -> B<'a> {
-    Ok(&[1, 2][..])
-  }
-
-  let x = test();
-  let b = x.unwrap();
-  let a = &mut [1, 2][..] as *mut [i32];
-
   std::process::Command::new("umount")
     .arg("./test")
     .spawn()

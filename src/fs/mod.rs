@@ -18,8 +18,8 @@ use crate::{
   icon_manager::IconManager,
 };
 
-const TTL: Lazy<Timespec> = Lazy::new(|| Timespec::new(1, 0)); // 1 second
-const UNIX_EPOCH: Lazy<Timespec> = Lazy::new(|| Timespec::new(0, 0));
+static TTL: Lazy<Timespec> = Lazy::new(|| Timespec::new(1, 0)); // 1 second
+static UNIX_EPOCH: Lazy<Timespec> = Lazy::new(|| Timespec::new(0, 0));
 
 const FINDER_INFO: &str = "com.apple.FinderInfo";
 const RSRC_FORK: &str = "com.apple.ResourceFork";

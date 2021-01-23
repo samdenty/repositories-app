@@ -30,7 +30,7 @@ impl TreeEntry {
       use self::trees::dsl::*;
       trees
         .filter(sha.eq(tree_sha).and(path.eq(entry_path)))
-        .first::<TreeEntry>(&*DB)?
+        .first::<TreeEntry>(db())?
     };
 
     Ok(entry)

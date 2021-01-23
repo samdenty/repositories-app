@@ -45,6 +45,10 @@
   }}
   on:blur={() => dispatch("close")}
   on:mousedown={onPageClick}
+  on:keydown={(e) => {
+    if (e.key !== "Escape") return;
+    dispatch("close");
+  }}
   on:mouseup={(e) => {
     if (Date.now() - now < 400) return;
     onPageClick(e);

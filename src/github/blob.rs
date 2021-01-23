@@ -33,7 +33,7 @@ impl Blob {
 
     diesel::replace_into(blobs::table)
       .values(&blob)
-      .execute(&*DB)?;
+      .execute(db())?;
 
     Ok(blob)
   }
@@ -43,7 +43,7 @@ impl Blob {
       use self::blobs::dsl::*;
       blobs
         .filter(sha.eq(blob_sha))
-        .first::<Blob>(&*DB)
+        .first::<Blob>(db())
         .optional()?
     };
 

@@ -53,7 +53,7 @@
     <MenuItem on:click={revealInFinder}>Reveal in Finder</MenuItem>
     <MenuItem on:click={openInTerminal}>Open in Terminal</MenuItem>
   {:else if link.type === "Repo"}
-    <MenuItem on:click={openInEditor}>Open repo in Editor</MenuItem>
+    <MenuItem on:click={openInEditor}>Open with VSCode</MenuItem>
     <MenuItem on:click={openInTerminal}>Open in Terminal</MenuItem>
     <MenuItem on:click={revealInFinder}>Reveal in Finder</MenuItem>
   {:else if link.type === "Folder"}

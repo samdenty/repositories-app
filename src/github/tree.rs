@@ -32,7 +32,7 @@ impl Tree {
       use self::trees::dsl::*;
       trees
         .filter(sha.eq(tree_sha).and(functions::regexp(re, path)))
-        .load::<TreeEntry>(&*DB)?
+        .load::<TreeEntry>(db())?
     };
 
     Ok(Tree {
@@ -45,7 +45,7 @@ impl Tree {
     use self::trees::dsl::*;
     use diesel::dsl::*;
 
-    Ok(select(exists(trees.filter(sha.eq(tree_sha)))).get_result::<bool>(&*DB)?)
+    Ok(select(exists(trees.filter(sha.eq(tree_sha)))).get_result::<bool>(db())?)
   }
 
   pub async fn cache(owner: &str, repo: &str, tree_sha: &str) -> Result<(), Box<dyn Error>> {
@@ -59,7 +59,7 @@ impl Tree {
   pub async fn get_all(owner: &str, repo: &str, tree_sha: &str) -> Result<Tree, Box<dyn Error>> {
     let entries = {
       use self::trees::dsl::*;
-      trees.filter(sha.eq(tree_sha)).load::<TreeEntry>(&*DB)?
+      trees.filter(sha.eq(tree_sha)).load::<TreeEntry>(db())?
     };
 
     if entries.is_empty() {
@@ -97,7 +97,7 @@ impl Tree {
           diesel::insert_into(blobs::table)
             .values(&blob)
             .on_conflict_do_nothing()
-            .execute(&*DB)?;
+            .execute(db())?;
 
           Some(tree.sha)
         } else {
@@ -116,7 +116,7 @@ impl Tree {
 
     diesel::insert_into(trees::table)
       .values(&entries)
-      .execute(&*DB)?;
+      .execute(db())?;
 
     Ok(Tree {
       sha: data.sha,

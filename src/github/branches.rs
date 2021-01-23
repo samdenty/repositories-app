@@ -30,7 +30,7 @@ impl Branch {
       repos
         .filter(owner.like(owner_name).and(name.like(repo_name)))
         .select(default_branch)
-        .first::<String>(&*DB)
+        .first::<String>(db())
         .optional()?
     };
     let branch_name = match branch_name {
@@ -42,7 +42,7 @@ impl Branch {
       use self::repo_branches::dsl::*;
       repo_branches
         .filter(owner.like(owner_name).and(repo.like(repo_name)))
-        .first::<Branch>(&*DB)
+        .first::<Branch>(db())
         .optional()?
     };
     let branch = match branch {
@@ -68,7 +68,7 @@ impl Branches {
       use self::repo_branches::dsl::*;
       repo_branches
         .filter(owner.like(owner_name).and(repo.like(repo_name)))
-        .load::<Branch>(&*DB)?
+        .load::<Branch>(db())?
     };
 
     if entries.is_empty() {
@@ -104,11 +104,11 @@ impl Branches {
       use self::repo_branches::dsl::*;
 
       diesel::delete(repo_branches.filter(owner.like(owner_name).and(repo.like(repo_name))))
-        .execute(&*DB)?;
+        .execute(db())?;
 
       diesel::insert_into(repo_branches)
         .values(&entries)
-        .execute(&*DB)?;
+        .execute(db())?;
     };
 
     let branches = Branches { entries };

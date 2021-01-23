@@ -67,6 +67,12 @@ fn main() {
         let path = match &link {
           Link::Repo(link) => format!("{}/{}", link.user, link.repo),
           Link::File(link) => format!("{}/{}/{}", link.user, link.repo, link.path),
+          Link::Folder(link) => format!(
+            "{}/{}/{}",
+            link.user,
+            link.repo,
+            link.path.clone().unwrap_or("".into())
+          ),
           _ => "/".into(),
         };
 
@@ -79,6 +85,12 @@ fn main() {
           Link::User(link) => link.user.clone(),
           Link::Repo(link) => format!("{}/{}", link.user, link.repo),
           Link::File(link) => format!("{}/{}/{}", link.user, link.repo, link.path),
+          Link::Folder(link) => format!(
+            "{}/{}/{}",
+            link.user,
+            link.repo,
+            link.path.clone().unwrap_or("".into())
+          ),
           _ => "/".into(),
         };
 

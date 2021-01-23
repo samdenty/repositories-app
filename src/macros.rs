@@ -9,7 +9,7 @@ macro_rules! regex {
 #[macro_export]
 macro_rules! github_api {
   ($($arg:tt)*) => {{
-      let res = format!("https://api.github.com/{}",format!($($arg)*));
+      let res = format!("https://api.github.com/{}", format!($($arg)*));
       res
   }}
 }
