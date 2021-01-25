@@ -35,7 +35,7 @@ pub enum IconInfo {
 }
 
 pub async fn get_info(url: Url, sizes: Option<String>) -> Result<IconInfo, Box<dyn Error>> {
-  let (mime, body): (_, Box<dyn AsyncRead + Unpin>) = match url.scheme() {
+  let (mime, mut body): (_, Box<dyn AsyncRead + Unpin>) = match url.scheme() {
     "data" => {
       let url = url.to_string();
       let url = DataUrl::process(&url).map_err(|_| "failed to parse data uri")?;
@@ -107,15 +107,15 @@ pub async fn get_info(url: Url, sizes: Option<String>) -> Result<IconInfo, Box<d
 
   Ok(match kind {
     IconKind::PNG => {
-      let size = get_png_sizes(body).await?;
+      let size = get_png_sizes(&mut body).await?;
       IconInfo::PNG { size }
     }
     IconKind::ICO => {
-      let sizes = get_ico_sizes(body).await?;
+      let sizes = get_ico_sizes(&mut body).await?;
       IconInfo::ICO { sizes }
     }
     IconKind::JPEG => {
-      let size = get_jpeg_size(body).await?;
+      let size = get_jpeg_size(&mut body).await?;
       IconInfo::JPEG { size }
     }
   })

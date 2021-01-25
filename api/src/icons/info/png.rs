@@ -3,7 +3,7 @@ use byteorder::{BigEndian, ReadBytesExt};
 use futures::prelude::*;
 use std::{error::Error, io::Cursor};
 
-pub async fn get_png_sizes<R: AsyncRead + Unpin>(mut reader: R) -> Result<String, Box<dyn Error>> {
+pub async fn get_png_sizes<R: AsyncRead + Unpin>(reader: &mut R) -> Result<String, Box<dyn Error>> {
   let mut header = [0; 24];
   reader.read_exact(&mut header).await?;
   let header = &mut Cursor::new(header);

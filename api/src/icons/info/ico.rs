@@ -1,3 +1,4 @@
+use super::png::get_png_sizes;
 use byteorder::{LittleEndian, ReadBytesExt};
 use futures::prelude::*;
 use std::{
@@ -9,10 +10,12 @@ const ICO_TYPE: u16 = 1;
 const INDEX_SIZE: u16 = 16;
 
 pub async fn get_ico_sizes<R: AsyncRead + Unpin>(
-  mut reader: R,
+  reader: &mut R,
 ) -> Result<Vec<String>, Box<dyn Error>> {
+  let mut offset = 0;
   let mut header = [0; 6];
   reader.read_exact(&mut header).await?;
+  offset += header.len();
   let mut header = Cursor::new(header);
 
   let header_type = header.read_u16::<LittleEndian>()?;
@@ -26,6 +29,7 @@ pub async fn get_ico_sizes<R: AsyncRead + Unpin>(
 
   let mut data = vec![0; (icon_count * INDEX_SIZE) as usize];
   reader.read_exact(&mut data).await?;
+  offset += data.len();
   let mut data = Cursor::new(data);
 
   let mut sizes = Vec::new();
@@ -35,7 +39,21 @@ pub async fn get_ico_sizes<R: AsyncRead + Unpin>(
     let width = data.read_u8()?;
     let height = data.read_u8()?;
 
-    sizes.push(format!("{}x{}", width, height))
+    if width == 0 && height == 0 {
+      data.seek(SeekFrom::Current(10))?;
+      let image_offset = data.read_u32::<LittleEndian>()?;
+
+      let mut data = vec![0; image_offset as usize - offset];
+      reader.read_exact(&mut data).await?;
+      offset += data.len();
+
+      let size = get_png_sizes(reader).await;
+      if let Ok(size) = size {
+        sizes.push(size);
+      }
+    } else {
+      sizes.push(format!("{}x{}", width, height))
+    }
   }
 
   Ok(sizes)

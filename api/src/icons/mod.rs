@@ -9,7 +9,7 @@ use lol_html::{element, HtmlRewriter, Settings};
 use once_cell::sync::Lazy;
 use reqwest::{header::*, Client, IntoUrl};
 use serde::{Deserialize, Serialize};
-use std::{error::Error, sync::Arc};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
 static CLIENT: Lazy<Arc<Client>> = Lazy::new(|| {
   let mut headers = HeaderMap::new();
@@ -30,7 +30,7 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
   let url = res.url().clone();
   let mut body = res.bytes_stream();
 
-  let mut icons = Vec::new();
+  let mut icons = HashMap::new();
   let mut logo = None;
   let mut manifest = None;
 
@@ -51,8 +51,10 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
               if let Some(href) = el.get_attribute("href") {
                 found_favicon = true;
                 let url = url.join(&href)?;
-                let info = get_info(url.clone(), el.get_attribute("sizes"));
-                icons.push((url, info));
+                if !icons.contains_key(&url) {
+                  let info = get_info(url.clone(), el.get_attribute("sizes"));
+                  icons.insert(url, info);
+                }
               }
 
               Ok(())
@@ -97,11 +99,13 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
                   .await
                   .ok()?;
 
-                let mut icons = Vec::new();
+                let mut icons = HashMap::new();
                 for icon in manifest.icons {
                   let url = manifest_url.join(&icon.src).ok()?;
-                  let info = get_info(url.clone(), icon.sizes);
-                  icons.push((url, info));
+                  if !icons.contains_key(&url) {
+                    let info = get_info(url.clone(), icon.sizes);
+                    icons.insert(url, info);
+                  }
                 }
 
                 Some(icons)
@@ -124,18 +128,22 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
   // Check for default favicon.ico
   if !found_favicon {
     let url = url.join("/favicon.ico")?;
-    let info = get_info(url.clone(), None);
-    icons.push((url, info));
+    if !icons.contains_key(&url) {
+      let info = get_info(url.clone(), None);
+      icons.insert(url, info);
+    }
   }
 
-  if let Some(logo) = logo {
-    icons.push(logo)
+  if let Some((url, info)) = logo {
+    if !icons.contains_key(&url) {
+      icons.insert(url, info);
+    }
   }
 
   if let Some(manifest) = manifest {
     let manifest_icons = manifest.await;
-    if let Some(mut manifest_icons) = manifest_icons {
-      icons.append(&mut manifest_icons);
+    if let Some(manifest_icons) = manifest_icons {
+      icons.extend(manifest_icons);
     }
   }
 

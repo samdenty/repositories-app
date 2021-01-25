@@ -4,7 +4,7 @@ use futures::prelude::*;
 use std::{error::Error, io::Cursor};
 use tokio_byteorder::AsyncReadBytesExt;
 
-pub async fn get_jpeg_size<R: AsyncRead + Unpin>(mut reader: R) -> Result<String, Box<dyn Error>> {
+pub async fn get_jpeg_size<R: AsyncRead + Unpin>(reader: &mut R) -> Result<String, Box<dyn Error>> {
   let mut data = [0; 2];
   reader.read_exact(&mut data).await?;
   let data = &mut Cursor::new(data);
