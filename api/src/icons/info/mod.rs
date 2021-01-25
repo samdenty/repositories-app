@@ -1,10 +1,12 @@
 mod ico;
+mod jpeg;
 mod png;
 
 use super::CLIENT;
 use data_url::DataUrl;
 use futures::{io::Cursor, prelude::*, stream::TryStreamExt};
 use ico::get_ico_sizes;
+use jpeg::get_jpeg_size;
 use mime::*;
 use png::get_png_sizes;
 use reqwest::{header::*, Url};
@@ -18,6 +20,7 @@ use std::{
 #[serde(rename_all = "lowercase")]
 enum IconKind {
   PNG,
+  JPEG,
   ICO,
 }
 
@@ -26,6 +29,7 @@ enum IconKind {
 #[serde(rename_all = "lowercase")]
 pub enum IconInfo {
   PNG { size: String },
+  JPEG { size: String },
   ICO { sizes: Vec<String> },
   SVG,
 }
@@ -80,6 +84,13 @@ pub async fn get_info(url: Url, sizes: Option<String>) -> Result<IconInfo, Box<d
       IconKind::PNG
     }
 
+    (IMAGE, JPEG) => {
+      if let Some(size) = sizes {
+        return Ok(IconInfo::JPEG { size });
+      }
+      IconKind::JPEG
+    }
+
     (IMAGE, "x-icon") | (IMAGE, "vnd.microsoft.icon") => {
       if let Some(sizes) = sizes {
         let sizes = sizes.split(" ").map(|s| s.to_string()).collect();
@@ -91,7 +102,7 @@ pub async fn get_info(url: Url, sizes: Option<String>) -> Result<IconInfo, Box<d
 
     (IMAGE, SVG) => return Ok(IconInfo::SVG),
 
-    _ => return Err("unsupported mime type".into()),
+    _ => return Err(format!("unsupported mime type {}", mime).into()),
   };
 
   Ok(match kind {
@@ -103,15 +114,29 @@ pub async fn get_info(url: Url, sizes: Option<String>) -> Result<IconInfo, Box<d
       let sizes = get_ico_sizes(body).await?;
       IconInfo::ICO { sizes }
     }
+    IconKind::JPEG => {
+      let size = get_jpeg_size(body).await?;
+      IconInfo::JPEG { size }
+    }
   })
 }
 
-fn slice_eq<T>(cur: &mut T, offset: u64, slice: &[u8]) -> Result<bool, Box<dyn Error>>
-where
-  T: Read + Seek + Unpin,
-{
+fn slice_eq<T: Read + Seek + Unpin>(
+  cur: &mut T,
+  offset: u64,
+  slice: &[u8],
+) -> Result<bool, Box<dyn Error>> {
   cur.seek(SeekFrom::Start(offset))?;
   let mut buffer = vec![0; slice.len()];
   cur.read_exact(&mut buffer)?;
   Ok(buffer == slice)
+}
+
+#[macro_export]
+macro_rules! assert_slice_eq {
+  ($cur:expr, $offset:expr, $slice:expr, $($arg:tt)+) => {{
+    if !super::slice_eq($cur, $offset, $slice)? {
+      return Err(format!($($arg)+).into());
+    }
+  }};
 }

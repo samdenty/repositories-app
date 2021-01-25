@@ -7,7 +7,7 @@ pub fn encode(icns: &Vec<u8>) -> Result<Vec<u8>, Error> {
   let mut rsrc = Vec::new();
   let icon_size = icns.len() as u32;
 
-  let mut header: Vec<u32> = vec![0; 65];
+  let mut header = [0; 65];
   header[0] = 0x100;
   header[1] = icon_size + 0x104;
   header[2] = icon_size + 0x4;

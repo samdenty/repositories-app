@@ -34,6 +34,8 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
   let mut logo = None;
   let mut manifest = None;
 
+  let mut found_favicon = false;
+
   {
     let mut rewriter = HtmlRewriter::try_new(
       Settings {
@@ -47,6 +49,7 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
             ),
             |el| {
               if let Some(href) = el.get_attribute("href") {
+                found_favicon = true;
                 let url = url.join(&href)?;
                 let info = get_info(url.clone(), el.get_attribute("sizes"));
                 icons.push((url, info));
@@ -116,6 +119,13 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
     while let Some(data) = body.next().await {
       rewriter.write(&data?)?;
     }
+  }
+
+  // Check for default favicon.ico
+  if !found_favicon {
+    let url = url.join("/favicon.ico")?;
+    let info = get_info(url.clone(), None);
+    icons.push((url, info));
   }
 
   if let Some(logo) = logo {

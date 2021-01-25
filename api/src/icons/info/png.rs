@@ -1,19 +1,15 @@
-use super::slice_eq;
+use crate::assert_slice_eq;
 use byteorder::{BigEndian, ReadBytesExt};
 use futures::prelude::*;
 use std::{error::Error, io::Cursor};
 
-pub async fn get_png_sizes<T>(mut reader: T) -> Result<String, Box<dyn Error>>
-where
-  T: AsyncRead + Unpin,
-{
-  let mut header = vec![0; 24];
+pub async fn get_png_sizes<R: AsyncRead + Unpin>(mut reader: R) -> Result<String, Box<dyn Error>> {
+  let mut header = [0; 24];
   reader.read_exact(&mut header).await?;
   let header = &mut Cursor::new(header);
 
-  if !slice_eq(header, 0, b"\x89PNG\r\n\x1a\n")? || !slice_eq(header, 12, b"IHDR")? {
-    return Err("bad header".into());
-  };
+  assert_slice_eq!(header, 0, b"\x89PNG\r\n\x1a\n", "bad header");
+  assert_slice_eq!(header, 12, b"IHDR", "bad header");
 
   let width = header.read_u32::<BigEndian>()?;
   let height = header.read_u32::<BigEndian>()?;

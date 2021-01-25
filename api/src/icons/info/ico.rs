@@ -8,11 +8,10 @@ use std::{
 const ICO_TYPE: u16 = 1;
 const INDEX_SIZE: u16 = 16;
 
-pub async fn get_ico_sizes<T>(mut reader: T) -> Result<Vec<String>, Box<dyn Error>>
-where
-  T: AsyncRead + Unpin,
-{
-  let mut header = vec![0; 6];
+pub async fn get_ico_sizes<R: AsyncRead + Unpin>(
+  mut reader: R,
+) -> Result<Vec<String>, Box<dyn Error>> {
+  let mut header = [0; 6];
   reader.read_exact(&mut header).await?;
   let mut header = Cursor::new(header);
 
