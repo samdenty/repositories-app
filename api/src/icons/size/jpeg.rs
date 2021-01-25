@@ -1,10 +1,13 @@
+use super::IconSize;
 use crate::assert_slice_eq;
 use byteorder::BigEndian;
 use futures::prelude::*;
 use std::{error::Error, io::Cursor};
 use tokio_byteorder::AsyncReadBytesExt;
 
-pub async fn get_jpeg_size<R: AsyncRead + Unpin>(reader: &mut R) -> Result<String, Box<dyn Error>> {
+pub async fn get_jpeg_size<R: AsyncRead + Unpin>(
+  reader: &mut R,
+) -> Result<IconSize, Box<dyn Error>> {
   let mut data = [0; 2];
   reader.read_exact(&mut data).await?;
   let data = &mut Cursor::new(data);
@@ -57,5 +60,5 @@ pub async fn get_jpeg_size<R: AsyncRead + Unpin>(reader: &mut R) -> Result<Strin
   let height = reader.read_u16::<BigEndian>().await?;
   let width = reader.read_u16::<BigEndian>().await?;
 
-  Ok(format!("{}x{}", width, height))
+  Ok(IconSize::new(width as _, height as _))
 }

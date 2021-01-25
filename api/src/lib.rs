@@ -1,4 +1,4 @@
-#![feature(async_closure)]
+#![feature(async_closure, map_into_keys_values)]
 extern crate cfg_if;
 extern crate wasm_bindgen;
 

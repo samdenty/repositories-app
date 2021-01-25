@@ -1,15 +1,15 @@
 mod info;
+mod size;
 
+use self::info::IconInfo;
 use future::join_all;
 use futures::prelude::*;
 use futures::StreamExt;
-use info::get_info;
-use info::IconInfo;
 use lol_html::{element, HtmlRewriter, Settings};
 use once_cell::sync::Lazy;
 use reqwest::{header::*, Client, IntoUrl};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error, sync::Arc};
+use std::{cmp::Ordering, collections::HashMap, error::Error, sync::Arc};
 
 static CLIENT: Lazy<Arc<Client>> = Lazy::new(|| {
   let mut headers = HeaderMap::new();
@@ -18,11 +18,32 @@ static CLIENT: Lazy<Arc<Client>> = Lazy::new(|| {
   Arc::new(client)
 });
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, PartialOrd, PartialEq, Ord, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum IconKind {
+  SiteLogo,
+  AppIcon,
+  Favicon,
+}
+
+#[derive(Serialize, PartialEq, Eq)]
 pub struct Icon {
-  url: String,
+  pub url: String,
+  pub kind: IconKind,
   #[serde(flatten)]
-  info: IconInfo,
+  pub info: IconInfo,
+}
+
+impl Ord for Icon {
+  fn cmp(&self, other: &Self) -> Ordering {
+    self.info.cmp(&other.info)
+  }
+}
+
+impl PartialOrd for Icon {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
 }
 
 pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> {
@@ -52,8 +73,8 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
                 found_favicon = true;
                 let url = url.join(&href)?;
                 if !icons.contains_key(&url) {
-                  let info = get_info(url.clone(), el.get_attribute("sizes"));
-                  icons.insert(url, info);
+                  let info = IconInfo::get(url.clone(), el.get_attribute("sizes"));
+                  icons.insert(url, (IconKind::Favicon, info));
                 }
               }
 
@@ -67,7 +88,7 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
 
             if let Some(href) = el.get_attribute("src") {
               let url = url.join(&href)?;
-              let info = get_info(url.clone(), None);
+              let info = IconInfo::get(url.clone(), None);
               logo = Some((url, info));
             }
 
@@ -103,8 +124,8 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
                 for icon in manifest.icons {
                   let url = manifest_url.join(&icon.src).ok()?;
                   if !icons.contains_key(&url) {
-                    let info = get_info(url.clone(), icon.sizes);
-                    icons.insert(url, info);
+                    let info = IconInfo::get(url.clone(), icon.sizes);
+                    icons.insert(url, (IconKind::AppIcon, info));
                   }
                 }
 
@@ -129,14 +150,14 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
   if !found_favicon {
     let url = url.join("/favicon.ico")?;
     if !icons.contains_key(&url) {
-      let info = get_info(url.clone(), None);
-      icons.insert(url, info);
+      let info = IconInfo::get(url.clone(), None);
+      icons.insert(url, (IconKind::Favicon, info));
     }
   }
 
   if let Some((url, info)) = logo {
     if !icons.contains_key(&url) {
-      icons.insert(url, info);
+      icons.insert(url, (IconKind::SiteLogo, info));
     }
   }
 
@@ -147,16 +168,20 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
     }
   }
 
-  let (urls, infos): (Vec<_>, Vec<_>) = icons.into_iter().unzip();
+  let (urls, infos): (Vec<_>, Vec<_>) = icons
+    .into_iter()
+    .map(|(url, (kind, info))| ((url, kind), info))
+    .unzip();
 
   let mut icons = Vec::new();
   for (i, info) in join_all(infos).await.into_iter().enumerate() {
     match info {
       Ok(info) => {
-        let url = urls.get(i).unwrap();
+        let (url, kind) = urls.get(i).unwrap();
 
         icons.push(Icon {
           url: url.to_string(),
+          kind: kind.clone(),
           info,
         })
       }
@@ -165,6 +190,8 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
       }
     }
   }
+
+  icons.sort();
 
   Ok(icons)
 }
