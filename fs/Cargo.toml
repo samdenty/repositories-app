@@ -1,8 +1,9 @@
 [package]
 authors = ["Sam Denty <sam@samdenty.com>"]
 edition = "2018"
-name = "repositories"
+name = "fs"
 version = "0.1.0"
+default-run = "fs"
 
 [[bin]]
 name = "native_message_host"
@@ -37,10 +38,10 @@ parking_lot = { version = "0.11.1", features = ["serde"] }
 rustbreak = { version = "2.0.0", features = ["yaml_enc"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = "1.0"
-reqwest = { git = "https://github.com/messense/reqwest", branch = "tokio-0-3", features = ["json", "blocking", "stream"] }
+reqwest = { git = "https://github.com/samdenty/reqwest", features = ["json", "blocking", "stream"] }
 futures = "0.3.8"
 sled = "0.34.6"
-log = "0.4"
+log = "0.4.13"
 api = { path = "../api" }
 env_logger = "0.8.2"
 serde_with = "1.6.0"

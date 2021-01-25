@@ -13,19 +13,18 @@ pub use tree_entry::*;
 pub use user::*;
 
 use once_cell::unsync::Lazy;
-use reqwest::{header, Client};
+use reqwest::{header::*, Client};
 use std::env;
 
 pub const CLIENT: Lazy<Client> = Lazy::new(|| {
-  let mut headers = header::HeaderMap::new();
+  let mut headers = HeaderMap::new();
 
   headers.insert(
-    header::AUTHORIZATION,
-    header::HeaderValue::from_str(&format!("Bearer {}", env::var("GITHUB_TOKEN").unwrap()))
-      .unwrap(),
+    AUTHORIZATION,
+    HeaderValue::from_str(&format!("Bearer {}", env::var("GITHUB_TOKEN").unwrap())).unwrap(),
   );
 
-  let client = reqwest::Client::builder()
+  let client = Client::builder()
     .user_agent("repositories")
     .default_headers(headers)
     .build()

@@ -6,8 +6,8 @@
   "scripts": {
     "build": "cd scripts; TS_NODE_TRANSPILE_ONLY=true webpack",
     "watch:chrome": "yarn build --mode development --watch",
-    "watch:native": "cargo watch -w \"$PWD/../src\" -x 'build --bin native_message_host'",
-    "watch": "concurrently yarn:watch:native yarn:watch:chrome"
+    "watch:host": "cd ../fs; cargo make watch-host",
+    "watch": "concurrently yarn:watch:host yarn:watch:chrome"
   },
   "dependencies": {
     "@types/chrome": "^0.0.128",

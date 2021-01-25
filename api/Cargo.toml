@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Sam Denty <sam@samdenty.com>"]
 edition = "2018"
 
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Oz", "--enable-mutable-globals"]
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -13,22 +16,19 @@ default = ["console_error_panic_hook"]
 [dependencies]
 cfg-if = "0.1.2"
 lol_html = "0.2.0"
-tokio = { version = "1.0.1", features = ["full"] }
-url = "2.2.0"
-serde = "1.0"
-reqwest = { git = "https://github.com/messense/reqwest", branch = "tokio-0-3", features = ["json", "blocking", "stream"] }
+once_cell = "1.5.2"
+tokio-byteorder = { git = "https://github.com/samdenty/tokio-byteorder", features = ["futures"] }
+web-sys = { version = "0.3.46", features = ['console'] }
+byteorder = "1.4.2"
+data-url = "0.1.0"
+mime = { git = "https://github.com/hyperium/mime" }
+serde = { version = "1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
+reqwest = { git = "https://github.com/samdenty/reqwest", features = ["json", "cookies", "blocking", "stream"] }
+wasm-bindgen-futures = "0.4.18"
 futures = "0.3.8"
 wasm-bindgen = "0.2.69"
-
-# The `console_error_panic_hook` crate provides better debugging of panics by
-# logging them with `console.error`. This is great for development, but requires
-# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
-# code size when deploying.
 console_error_panic_hook = { version = "0.1.1", optional = true }
-
-# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
-# compared to the default allocator's ~10K. It is slower than the default
-# allocator, however.
 wee_alloc = { version = "0.4.2", optional = true }
 
 [dev-dependencies]

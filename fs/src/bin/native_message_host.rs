@@ -77,7 +77,7 @@ fn main() {
         };
 
         Command::new("/usr/local/bin/code-insiders")
-          .arg(format!("/Users/samdenty/Projects/repos/test/{}", path))
+          .arg(format!("/Users/samdenty/Projects/repos/fs/test/{}", path))
           .spawn();
       }
       Message::RevealInFinder(link) => {
@@ -101,7 +101,7 @@ fn main() {
           command.arg("-R");
         }
 
-        command.arg(format!("/Users/samdenty/Projects/repos/test/{}", path));
+        command.arg(format!("/Users/samdenty/Projects/repos/fs/test/{}", path));
 
         command.spawn();
       }

@@ -4,7 +4,6 @@ use chrono::{DateTime, Local};
 use colored::Colorize;
 use fuse::FileType;
 use fuse_mt::*;
-use log::debug;
 use once_cell::sync::Lazy;
 use relative_path::RelativePath;
 use std::convert::TryInto;

@@ -10,5 +10,8 @@ headless_chrome = { path = "../rust-headless-chrome" }
 [patch."https://github.com/samdenty/fuse-mt"]
 fuse_mt = { path = "../fuse-mt" }
 
+[patch."https://github.com/samdenty/reqwest"]
+reqwest = { path = "../reqwest" }
+
 [patch.crates-io]
 image = { path = "../image" }

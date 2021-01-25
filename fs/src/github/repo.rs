@@ -1,6 +1,6 @@
 use super::{Branch, Branches, Tree, User, CLIENT};
 use crate::{database::*, github_api};
-use api::icons::get_icons;
+use api::icons::{get_icons, Icon};
 use github_rs::client::Executor;
 use serde::Deserializer;
 use serde::{Deserialize, Serialize};
@@ -97,7 +97,7 @@ impl Repo {
     Ok(repo)
   }
 
-  pub async fn get_icons(&self) -> Result<Vec<String>, Box<dyn Error>> {
+  pub async fn get_icons(&self) -> Result<Vec<Icon>, Box<dyn Error>> {
     if let Some(ref url) = self.homepage {
       let urls = get_icons(url).await?;
       Ok(urls)

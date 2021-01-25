@@ -1,3 +1,4 @@
+#![feature(async_closure)]
 extern crate cfg_if;
 extern crate wasm_bindgen;
 
@@ -18,6 +19,7 @@ cfg_if! {
 }
 
 #[wasm_bindgen]
-pub fn greet() -> String {
-  "Hello, wasm-worker!".to_string()
+pub async fn get_icons(url: String) -> String {
+  let icons = icons::get_icons(&url).await.unwrap();
+  serde_json::to_string_pretty(&icons).unwrap()
 }

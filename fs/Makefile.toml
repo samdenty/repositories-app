@@ -1,0 +1,10 @@
+[tasks.watch-host]
+command = "cargo"
+args = ["build", "--bin=native_message_host"]
+watch = true
+
+[tasks.watch]
+env = { "RUST_LOG" = "fs" }
+command = "cargo"
+args = ["run"]
+watch = true
