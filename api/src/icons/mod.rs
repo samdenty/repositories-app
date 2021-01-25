@@ -81,19 +81,27 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
               Ok(())
             }
           ),
-          element!("header img", |el| {
-            if logo.is_some() {
-              return Ok(());
-            };
+          element!(
+            concat!(
+              "header img,",
+              "img[src*=logo],",
+              "img[alt*=logo],",
+              "img[class*=logo]"
+            ),
+            |el| {
+              if logo.is_some() {
+                return Ok(());
+              };
 
-            if let Some(href) = el.get_attribute("src") {
-              let url = url.join(&href)?;
-              let info = IconInfo::get(url.clone(), None);
-              logo = Some((url, info));
+              if let Some(href) = el.get_attribute("src") {
+                let url = url.join(&href)?;
+                let info = IconInfo::get(url.clone(), None);
+                logo = Some((url, info));
+              }
+
+              Ok(())
             }
-
-            Ok(())
-          }),
+          ),
           element!("link[rel='manifest']", |el| {
             if let Some(href) = el.get_attribute("href") {
               let manifest_url = url.join(&href)?;
