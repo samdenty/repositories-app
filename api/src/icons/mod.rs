@@ -194,7 +194,7 @@ pub async fn get_icons<U: IntoUrl>(url: U) -> Result<Vec<Icon>, Box<dyn Error>> 
         })
       }
       Err(e) => {
-        web_sys::console::warn_1(&format!("{}", e).into());
+        warn!("failed to parse icon: {}", e);
       }
     }
   }

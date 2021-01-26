@@ -1,5 +1,5 @@
-use super::{Blob, Tree, CLIENT};
-use crate::{database::*, github_api};
+use super::{Blob, Tree};
+use crate::database::*;
 use api::icons::get_icons;
 use fuse::FileType;
 use github_rs::client::Executor;

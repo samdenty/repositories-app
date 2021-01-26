@@ -5,11 +5,3 @@ macro_rules! regex {
     RE.get_or_init(|| regex::Regex::new($re).unwrap())
   }};
 }
-
-#[macro_export]
-macro_rules! github_api {
-  ($($arg:tt)*) => {{
-      let res = format!("https://api.github.com/{}", format!($($arg)*));
-      res
-  }}
-}

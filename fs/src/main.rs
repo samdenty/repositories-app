@@ -1,9 +1,4 @@
-#![feature(
-  proc_macro_hygiene,
-  duration_constants,
-  async_closure,
-  impl_trait_in_bindings
-)]
+#![feature(proc_macro_hygiene, duration_constants, async_closure)]
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -14,6 +9,8 @@ extern crate diesel;
 extern crate hex_literal;
 #[macro_use]
 extern crate diesel_migrations;
+#[macro_use]
+extern crate api;
 
 mod database;
 mod fs;
@@ -25,7 +22,7 @@ use github::Repo;
 use github::Tree;
 use icon_manager::IconManager;
 use serde::Deserialize;
-use std::error::Error;
+use std::{env, error::Error};
 
 #[derive(Deserialize, Debug)]
 pub struct Organization {
@@ -36,6 +33,7 @@ pub struct Organization {
 fn main() -> Result<(), Box<dyn Error>> {
   env_logger::init();
   color_backtrace::install();
+  api::github::set_token(env::var("GITHUB_TOKEN").unwrap());
 
   let now = std::time::Instant::now();
   // let a = Repo::get("alainm23", "planner")

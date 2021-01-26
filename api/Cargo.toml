@@ -15,8 +15,13 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 cfg-if = "0.1.2"
+itertools = "0.10.0"
+console_log = "0.2.0"
+regex = "1"
+log = "0.4.13"
 lol_html = "0.2.0"
 once_cell = "1.5.2"
+scraper = "0.12.0"
 tokio-byteorder = { git = "https://github.com/samdenty/tokio-byteorder", features = ["futures"] }
 web-sys = { version = "0.3.46", features = ['console'] }
 byteorder = "1.4.2"

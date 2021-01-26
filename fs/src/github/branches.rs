@@ -1,9 +1,8 @@
-use super::{Blob, Repo, Tree, CLIENT};
-use super::{TreeEntry, User};
-use crate::{database::*, github_api};
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error};
-use std::{collections::HashSet, sync::Arc};
+use super::TreeEntry;
+use super::{Repo, Tree};
+use crate::database::*;
+use serde::Deserialize;
+use std::error::Error;
 
 #[derive(Identifiable, Queryable, Insertable, Debug, Clone)]
 #[primary_key(owner, repo, name)]
@@ -81,8 +80,7 @@ impl Branches {
   }
 
   pub async fn load(owner_name: &str, repo_name: &str) -> Result<Branches, Box<dyn Error>> {
-    let res = CLIENT
-      .get(&github_api!("repos/{}/{}/branches", owner_name, repo_name))
+    let res = github_api_get!("repos/{}/{}/branches", owner_name, repo_name)
       .send()
       .await?;
 

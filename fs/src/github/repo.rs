@@ -1,5 +1,5 @@
-use super::{Branch, Branches, Tree, User, CLIENT};
-use crate::{database::*, github_api};
+use super::{Branch, Branches, Tree, User};
+use crate::database::*;
 use api::icons::{get_icons, Icon};
 use github_rs::client::Executor;
 use serde::Deserializer;
@@ -12,8 +12,7 @@ pub struct UserRepos {}
 impl UserRepos {
   pub async fn load(owner_name: &str) -> Result<Vec<RepoData>, Box<dyn Error>> {
     use self::repos::dsl::*;
-    let all_repos = CLIENT
-      .get(&github_api!("users/{}/repos", owner_name))
+    let all_repos = github_api_get!("users/{}/repos", owner_name)
       .send()
       .await?
       .json::<Vec<RepoData>>()
@@ -79,10 +78,7 @@ impl Repo {
   }
 
   pub async fn load(owner: &str, name: &str) -> Result<RepoData, Box<dyn Error>> {
-    let res = CLIENT
-      .get(&github_api!("repos/{}/{}", owner, name))
-      .send()
-      .await?;
+    let res = github_api_get!("repos/{}/{}", owner, name).send().await?;
 
     if res.status() == 404 {
       return Err("could not find repo".into());

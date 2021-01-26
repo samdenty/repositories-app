@@ -1,5 +1,5 @@
-use super::{Blob, TreeEntry, CLIENT};
-use crate::{database::*, github_api};
+use super::{Blob, TreeEntry};
+use crate::database::*;
 use api::icons::get_icons;
 use github_rs::client::Executor;
 use serde::Deserializer;
@@ -72,13 +72,7 @@ impl Tree {
   }
 
   pub async fn load_all(owner: &str, repo: &str, sha: &str) -> Result<Tree, Box<dyn Error>> {
-    let res = CLIENT
-      .get(&github_api!(
-        "repos/{}/{}/git/trees/{}?recursive=1",
-        owner,
-        repo,
-        sha
-      ))
+    let res = github_api_get!("repos/{}/{}/git/trees/{}?recursive=1", owner, repo, sha)
       .send()
       .await?;
 

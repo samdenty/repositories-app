@@ -1,4 +1,4 @@
-use super::{repo::Repo, CLIENT};
+use super::repo::Repo;
 use crate::database::*;
 use github_rs::client::Executor;
 use once_cell::sync::Lazy;

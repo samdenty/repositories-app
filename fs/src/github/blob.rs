@@ -1,6 +1,5 @@
 use super::User;
-use super::CLIENT;
-use crate::{database::*, github_api};
+use crate::database::*;
 use api::icons::get_icons;
 use github_rs::client::Executor;
 use serde::Deserializer;
@@ -18,8 +17,7 @@ pub struct Blob {
 
 impl Blob {
   pub async fn load(owner: &str, repo: &str, sha: &str) -> Result<Blob, Box<dyn Error>> {
-    let data = CLIENT
-      .get(&github_api!("repos/{}/{}/git/blobs/{}", owner, repo, sha))
+    let data = github_api_get!("repos/{}/{}/git/blobs/{}", owner, repo, sha)
       .header("Accept", "application/vnd.github.v3.raw")
       .send()
       .await?
