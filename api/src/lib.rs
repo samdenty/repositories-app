@@ -1,12 +1,16 @@
 #![feature(async_closure, map_into_keys_values)]
+#[macro_use]
 extern crate cfg_if;
 extern crate wasm_bindgen;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate cached;
 extern crate regex;
 
 pub mod github;
 pub mod icons;
+mod macros;
 mod utils;
 
 use cfg_if::cfg_if;
@@ -36,7 +40,17 @@ pub async fn get_icons(url: String) -> String {
 }
 
 #[wasm_bindgen]
+pub fn set_token(token: String) {
+  github::set_token(&token);
+}
+
+#[wasm_bindgen]
 pub async fn get_repo_icons(owner: String, repo: String) -> String {
-  let icons = github::get_repo_icons(&owner, &repo, None).await.unwrap();
-  serde_json::to_string_pretty(&icons).unwrap()
+  let images = github::RepoIcons::new(&owner, &repo, None)
+    .await
+    .unwrap()
+    .get_images()
+    .await;
+
+  serde_json::to_string_pretty(&images).unwrap()
 }

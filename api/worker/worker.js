@@ -7,13 +7,15 @@ addEventListener("fetch", (event) => {
  * @param {Request} request
  */
 async function handleRequest(request) {
-  const { get_icons, get_repo_icons } = wasm_bindgen;
+  const { get_icons, get_repo_icons, set_token } = wasm_bindgen;
   await wasm_bindgen(wasm);
 
   const url = new URL(request.url);
 
-  let site_url = url.searchParams.get("url");
+  let token = url.searchParams.get("token");
+  if (token) set_token(token);
 
+  let site_url = url.searchParams.get("url");
   if (site_url) {
     const greeting = await get_icons(site_url);
     return new Response(greeting, { status: 200 });
@@ -21,7 +23,6 @@ async function handleRequest(request) {
 
   let user = url.searchParams.get("user");
   let repo = url.searchParams.get("repo");
-
   if (user && repo) {
     const greeting = await get_repo_icons(user, repo);
     return new Response(greeting, { status: 200 });
