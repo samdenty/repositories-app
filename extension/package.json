@@ -14,7 +14,7 @@
     "comlink": "^4.3.0",
     "comlink-extension": "^1.0.8",
     "github-reserved-names": "^2.0.4",
-    "svelte": "^3.31.2",
+    "svelte": "^3.49.0",
     "webextension-polyfill-ts": "^0.22.0"
   },
   "devDependencies": {
